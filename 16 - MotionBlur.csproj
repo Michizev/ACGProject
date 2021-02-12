@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Example</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="content\anotherTest.glb" />
+    <EmbeddedResource Include="content\anotherTest.gltf" />
+    <EmbeddedResource Include="content\back.jpg" />
+    <EmbeddedResource Include="content\bix.obj" />
+    <EmbeddedResource Include="content\bottom.jpg" />
+    <EmbeddedResource Include="content\cube.glb" />
+    <EmbeddedResource Include="content\Daylight Box_Back.bmp" />
+    <EmbeddedResource Include="content\Daylight Box_Bottom.bmp" />
+    <EmbeddedResource Include="content\Daylight Box_Front.bmp" />
+    <EmbeddedResource Include="content\Daylight Box_Left.bmp" />
+    <EmbeddedResource Include="content\Daylight Box_Right.bmp" />
+    <EmbeddedResource Include="content\Daylight Box_Top.bmp" />
+    <EmbeddedResource Include="content\ferris_wheel_animated.bin" />
+    <EmbeddedResource Include="content\ferris_wheel_animated.gltf" />
+    <EmbeddedResource Include="content\front.jpg" />
+    <EmbeddedResource Include="content\left.jpg" />
+    <EmbeddedResource Include="content\lightPassDef.frag" />
+    <EmbeddedResource Include="content\lightPassDef.vert" />
+    <EmbeddedResource Include="content\meshSkybox.obj" />
+    <EmbeddedResource Include="content\lessSkybox.frag" />
+    <EmbeddedResource Include="content\lessSkybox.vert" />
+    <EmbeddedResource Include="content\gPassDef.frag" />
+    <EmbeddedResource Include="content\gPassDef.vert" />
+    <EmbeddedResource Include="content\right.jpg" />
+    <EmbeddedResource Include="content\skybox.frag" />
+    <EmbeddedResource Include="content\skybox.vert" />
+    <EmbeddedResource Include="content\noTexture.vert" />
+    <EmbeddedResource Include="content\noTexture.frag" />
+    <EmbeddedResource Include="content\postProcessing.frag" />
+    <EmbeddedResource Include="content\postProcessing.vert" />
+    <EmbeddedResource Include="content\top.jpg" />
+    <EmbeddedResource Include="content\tssdBK.png" />
+    <EmbeddedResource Include="content\tssdDN.png" />
+    <EmbeddedResource Include="content\tssdFT.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\tssdLF.png" />
+    <EmbeddedResource Include="content\tssdRT.png" />
+    <EmbeddedResource Include="content\tssdUP.png" />
+    <Resource Include="content\wubeFolder\square_floor_diff_1k.jpg" />
+    <Resource Include="content\wubeFolder\square_floor_nor_1k_jaa.jpg" />
+    <Resource Include="content\wubeFolder\square_floor_rough_1k.png" />
+    <EmbeddedResource Include="content\wubeFolder\wube.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\wubeFolder\wube.gltf" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="glTF2Loader" Version="1.1.1-alpha" />
+    <PackageReference Include="OpenTK" Version="4.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="content\anotherTest.glb" />
+    <None Remove="content\anotherTest.gltf" />
+    <None Remove="content\back.jpg" />
+    <None Remove="content\bix.obj" />
+    <None Remove="content\bottom.jpg" />
+    <None Remove="content\cube.glb" />
+    <None Remove="content\Daylight Box_Back.bmp" />
+    <None Remove="content\Daylight Box_Bottom.bmp" />
+    <None Remove="content\Daylight Box_Front.bmp" />
+    <None Remove="content\Daylight Box_Left.bmp" />
+    <None Remove="content\Daylight Box_Right.bmp" />
+    <None Remove="content\Daylight Box_Top.bmp" />
+    <None Remove="content\front.jpg" />
+    <None Remove="content\gPassDef.frag" />
+    <None Remove="content\gPassDef.vert" />
+    <None Remove="content\left.jpg" />
+    <None Remove="content\LessSkybox.frag" />
+    <None Remove="content\lessSkybox.vert" />
+    <None Remove="content\lightPassDef.frag" />
+    <None Remove="content\lightPassDef.vert" />
+    <None Remove="content\meshSkybox.obj" />
+    <None Remove="content\postProcessing.frag" />
+    <None Remove="content\postProcessing.vert" />
+    <None Remove="content\right.jpg" />
+    <None Remove="content\skybox.frag" />
+    <None Remove="content\skybox.vert" />
+    <None Remove="content\top.jpg" />
+    <None Remove="content\tssdBK.png" />
+    <None Remove="content\tssdDN.png" />
+    <None Remove="content\tssdFT.png" />
+    <None Remove="content\tssdLF.png" />
+    <None Remove="content\tssdRT.png" />
+    <None Remove="content\tssdUP.png" />
+    <None Remove="content\wubeFolder\wube.bin" />
+    <None Remove="content\wubeFolder\wube.gltf" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CjClutter.ObjLoader" Version="1.0.0" />
+    <PackageReference Include="OpenTK" Version="4.4.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="content\wubeFolder\square_floor_diff_1k.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\wubeFolder\square_floor_nor_1k.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\wubeFolder\square_floor_nor_1k_jaa.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\wubeFolder\square_floor_rough_1k.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
