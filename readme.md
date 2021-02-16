@@ -1,2 +1,28 @@
-# TODO
-1. Look at the `TODOs` in the code. In Visual Studio you can find them quickly by selecting `View` -> `Task List`. In other editors search for `TODO`.
+### Project for Advanced Computer Grafics
+
+
+#### Minimum needed effects 
+- [ ] Shadow Map
+- [ ] Env Map
+- [x] Lighting
+- [ ] Bloom
+- [x] Instancing
+
+#### Better effects or upgrades
+- [ ] Post processing
+  - [ ] SSAO
+- [ ] Env Map
+  - [ ] Imperfect reflections 
+- [ ] Spezielle shadow maps
+  - [ ] VSM 
+- [x] Normal mapping
+- [x] Deferred lighting
+- [ ] Paralax mapping
+- [ ] Water rendering
+- [ ] Physical Particles (GPU)
+- [ ] Tesselation
+
+#### Other things needed
+- [ ] Skinning
+- [ ] Scene
+- [x] Basic PBR
