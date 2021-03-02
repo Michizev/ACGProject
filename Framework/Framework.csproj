@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CjClutter.ObjLoader" Version="1.0.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.2" />
+    <PackageReference Include="OpenTK" Version="4.5.0" />
+  </ItemGroup>
+
+</Project>

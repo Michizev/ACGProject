@@ -11,15 +11,18 @@ in vec3 normal;
 in vec2 texcoord_0;
 in vec3 tangent;
 
-
+uniform vec3 cameraPos;
 
 out Data
 {
 	vec2 texCoords;
 	vec3 normal;
-	vec3 position;
+	vec4 position;
 	mat3 TBN;
 	vec3 tangent;
+	vec3 tangentPos;
+    vec3 tangentCameraPos;
+	vec3 positionRaw;
 } o;
 
 void main()
@@ -27,7 +30,8 @@ void main()
 	vec3 worldNormal = normalize(mat3(world) * normal);
 	o.normal = worldNormal;
 	vec4 position_world = world * vec4(position,1);
-	o.position = position_world.xyz;
+	o.positionRaw = position;
+	o.position = position_world;
 	o.texCoords = texcoord_0;
 	mat4 modelViewProjection = camera*world;
 	gl_Position = camera * position_world;
@@ -60,5 +64,17 @@ void main()
 
 	o.TBN = TBN;
 	o.tangent = worldTangent;
+	/*
+	vec3 TT = normalize(vec3(model * vec4(tangent,   0.0)));
+	vec3 BT = normalize(vec3(model * vec4(cross(normal,tangent), 0.0)));
+	vec3 NT = normalize(vec3(model * vec4(normal,    0.0)));
+	*/
+	vec3 TT   = normalize(mat3(world) * tangent);
+    vec3 BT   = normalize(mat3(world) * cross(normal,tangent));
+    vec3 NT   = normalize(mat3(world) * normal);
+	mat3 TTBN = mat3(TT, BT, NT);
+
+	o.tangentCameraPos = TTBN * cameraPos;
+	o.tangentPos = TTBN * position_world.xyz;
 
 }

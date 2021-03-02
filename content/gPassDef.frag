@@ -1,19 +1,26 @@
 #version 430 core
 
-layout (location = 0) out vec3 Position;
+layout (location = 0) out vec4 Position;
 layout (location = 1) out vec3 Normal;
 layout (location = 2) out vec4 AlbedoSpec;
 layout (location = 3) out vec4 MetalRoughness;
+layout (location = 4) out vec3 PositionRaw;
 
 in Data
 {
 	vec2 texCoords;
 	vec3 normal;
-	vec3 position;
+	vec4 position;
     mat3 TBN;
 	vec3 tangent;
+    vec3 tangentPos;
+    vec3 tangentCameraPos;
+    vec3 positionRaw;
 } i;
 
+
+uniform float heightScale = 1.0;
+uniform vec3 cameraPos;
 
 uniform sampler2D albedoMap;
 uniform sampler2D metalRoughnessMap;
@@ -40,33 +47,85 @@ vec3 CalcBumpedNormal()
     return NewNormal;
 }
 
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+    float height =  texture(metalRoughnessMap, texCoords).b;    
+    vec2 p = viewDir.xy / viewDir.z * (height * heightScale);
+    return texCoords - p;    
+}
+
+vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+    // number of depth layers
+    const float numLayers = 10;
+    // calculate the size of each layer
+    float layerDepth = 1.0 / numLayers;
+    // depth of current layer
+    float currentLayerDepth = 0.0;
+    // the amount to shift the texture coordinates per layer (from vector P)
+    vec2 P = viewDir.xy * heightScale; 
+    vec2 deltaTexCoords = P / numLayers;   
+
+    // get initial values
+    vec2  currentTexCoords     = texCoords;
+    float currentDepthMapValue = texture(metalRoughnessMap, currentTexCoords).b;
+  
+    while(currentLayerDepth < currentDepthMapValue)
+    {
+        // shift texture coordinates along direction of P
+        currentTexCoords -= deltaTexCoords;
+        // get depthmap value at current texture coordinates
+        currentDepthMapValue = texture(metalRoughnessMap, currentTexCoords).b;  
+        // get depth of next layer
+        currentLayerDepth += layerDepth;  
+    }
+
+    return currentTexCoords;
+}
 
 void main()
-{    
+{   
+    vec3 viewDir   = normalize(i.tangentPos - i.tangentCameraPos);
+
+    PositionRaw = i.positionRaw;
+    //vec3 viewDir   = normalize(i.position - cameraPos);
+    vec2 texCoords = ParallaxMapping(i.texCoords,  viewDir);
+
+    float height =  texture(metalRoughnessMap, texCoords).b;  
+    height = 0;
+    float v = height * 1 - 1;
+    texCoords = i.texCoords + (viewDir.xy * v);
+
+    texCoords = i.texCoords;
+
+    /*
+    if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
+    discard;
+    */
+
     // store the fragment position vector in the first gbuffer texture
     Position = i.position;
 
     // also store the per-fragment normals into the gbuffer
     vec3 realNormal = normalize(i.normal);
-    vec3 normaltex = texture(normalMap, i.texCoords).rgb;
+    vec3 normaltex = texture(normalMap, texCoords).rgb;
 	vec3 normal = normaltex * 2.0 - 1.0;   
 	//Normal = normalize(i.TBN * normal); 
 
-    if(i.texCoords.x > 0.1f)
-    {
-        //Normal = normalize(i.normal);
-    }else{
-        
-    }
+
     //Normal = normalize(i.TBN*normaltex);
     Normal = i.TBN*normal;
 
+    //Normal = i.TBN*vec3(texCoords,0);
+
     //Normal = CalcBumpedNormal();
     // and the diffuse per-fragment color
-    AlbedoSpec.rgb = texture(albedoMap, i.texCoords).rgb;
+    AlbedoSpec.rgb = texture(albedoMap, texCoords).rgb;
     AlbedoSpec.a = 1;
 
-    MetalRoughness.rgb = texture(metalRoughnessMap,i.texCoords).rgb;
+    //AlbedoSpec.rgb = vec3(texCoords,0);
+
+    MetalRoughness.rgb = texture(metalRoughnessMap, texCoords).rgb;
     MetalRoughness.a = 1;
     // store specular intensity in gAlbedoSpec's alpha component
     //AlbedoSpec.a = texture(specularTexture, i.texCoords).r;

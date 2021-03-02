@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q16-HDRI-AnyCPU" Version="7.23.2" />
+  </ItemGroup>
+
+<Target Name="ChangeAliasesOfNugetRefs" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+	<ItemGroup>
+		<ReferencePath Condition="'%(FileName)' == 'Magick.NET-Q16-HDRI-AnyCPU'">
+			<Aliases>MagickImage16</Aliases>
+		</ReferencePath>
+		<ReferencePath Condition="'%(FileName)' == 'Magick.NET.Core'">
+			<Aliases>MagickImage16</Aliases>
+		</ReferencePath>
+	</ItemGroup>
+</Target>
+	
+</Project>

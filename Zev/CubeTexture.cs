@@ -48,10 +48,11 @@ namespace Example.Zev
         }
     }
 
-    enum CubeMapSide { RIGHT, LEFT, TOP, BOTTOM, FRONT, BACK };
     
-    class CubeTextureLoaderData
+    
+    public class CubeTextureLoaderData
     {
+        public enum CubeMapSide { RIGHT, LEFT, TOP, BOTTOM, FRONT, BACK };
         public Dictionary<CubeMapSide, string> textureNames;
         public Dictionary<CubeMapSide, string> sideNames;
         List<CubeMapSide> openglCubeOrder = new List<CubeMapSide>() { CubeMapSide.LEFT, CubeMapSide.RIGHT, CubeMapSide.TOP, CubeMapSide.BOTTOM, CubeMapSide.FRONT, CubeMapSide.BACK };
@@ -88,7 +89,7 @@ namespace Example.Zev
             }
 
         }
-        public string ResourceDir { get; internal set; }
+        public string ResourceDir { get; set; }
 
         public CubeTextureLoaderData()
         {
@@ -116,8 +117,22 @@ namespace Example.Zev
             }
         }
     }
-    static class CubeTextureLoader
+    public static class CubeTextureLoader
     {
+        public static CubeTexture MakeEmptyCubeMap(int width, int height)
+        {
+            var texture = new CubeTexture(SizedInternalFormat.Rgba16f);
+            GL.BindTexture(TextureTarget.TextureCubeMap, texture.Handle);
+
+            var pixelFormat = PixelInternalFormat.Rgba16f;
+            var pixelType = PixelFormat.Rgb;
+            for (int i = 0; i < 6; ++i)
+            {
+                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + (int)i, 0, pixelFormat, width,height, 0, pixelType, PixelType.Float, IntPtr.Zero);
+            }
+            texture.SetSize(width, height);
+            return texture;
+        }
         public static CubeTexture Load(CubeTextureLoaderData data)
         {
             var texture = new CubeTexture(SizedInternalFormat.Rgba8);
@@ -156,6 +171,8 @@ namespace Example.Zev
                 default: throw new ArgumentOutOfRangeException("Unexpected image format");
             }
 
+            
+            
             return image;
         }
     }

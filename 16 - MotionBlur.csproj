@@ -13,12 +13,28 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Framework\**" />
+    <Compile Remove="HDRIHelper\**" />
+    <Compile Remove="ImageHelper8Bit\**" />
+    <EmbeddedResource Remove="Framework\**" />
+    <EmbeddedResource Remove="HDRIHelper\**" />
+    <EmbeddedResource Remove="ImageHelper8Bit\**" />
+    <None Remove="Framework\**" />
+    <None Remove="HDRIHelper\**" />
+    <None Remove="ImageHelper8Bit\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Zev\UniformCubeTexture.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="content\anotherTest.glb" />
     <EmbeddedResource Include="content\anotherTest.gltf" />
     <EmbeddedResource Include="content\back.jpg" />
+    <EmbeddedResource Include="content\bix - Kopieren.obj" />
     <EmbeddedResource Include="content\bix.obj" />
     <EmbeddedResource Include="content\bottom.jpg" />
     <EmbeddedResource Include="content\cube.glb" />
+    <EmbeddedResource Include="content\cubeNew.obj" />
     <EmbeddedResource Include="content\Daylight Box_Back.bmp" />
     <EmbeddedResource Include="content\Daylight Box_Bottom.bmp" />
     <EmbeddedResource Include="content\Daylight Box_Front.bmp" />
@@ -29,6 +45,10 @@
     <EmbeddedResource Include="content\ferris_wheel_animated.gltf" />
     <EmbeddedResource Include="content\front.jpg" />
     <EmbeddedResource Include="content\left.jpg" />
+    <EmbeddedResource Include="content\irradiance.frag" />
+    <EmbeddedResource Include="content\irradiance.vert" />
+    <EmbeddedResource Include="content\depthLight.frag" />
+    <EmbeddedResource Include="content\depthLight.vert" />
     <EmbeddedResource Include="content\lightPassDef.frag" />
     <EmbeddedResource Include="content\lightPassDef.vert" />
     <EmbeddedResource Include="content\meshSkybox.obj" />
@@ -36,6 +56,16 @@
     <EmbeddedResource Include="content\lessSkybox.vert" />
     <EmbeddedResource Include="content\gPassDef.frag" />
     <EmbeddedResource Include="content\gPassDef.vert" />
+    <EmbeddedResource Include="content\lightBallsShader.frag" />
+    <EmbeddedResource Include="content\lightBallsShader.vert" />
+    <EmbeddedResource Include="content\otherModelLess\testSchatten.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\otherModelLess\testSchatten.gltf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\otherModel\oof.bin" />
+    <EmbeddedResource Include="content\otherModel\oof.gltf" />
     <EmbeddedResource Include="content\right.jpg" />
     <EmbeddedResource Include="content\skybox.frag" />
     <EmbeddedResource Include="content\skybox.vert" />
@@ -43,6 +73,11 @@
     <EmbeddedResource Include="content\noTexture.frag" />
     <EmbeddedResource Include="content\postProcessing.frag" />
     <EmbeddedResource Include="content\postProcessing.vert" />
+    <EmbeddedResource Include="content\Sphere - Kopieren.obj" />
+    <EmbeddedResource Include="content\Sphere.obj" />
+    <EmbeddedResource Include="content\suzanne.obj" />
+    <EmbeddedResource Include="content\testScene\scene.bin" />
+    <EmbeddedResource Include="content\testScene\scene.gltf" />
     <EmbeddedResource Include="content\top.jpg" />
     <EmbeddedResource Include="content\tssdBK.png" />
     <EmbeddedResource Include="content\tssdDN.png" />
@@ -68,29 +103,46 @@
     <None Remove="content\anotherTest.glb" />
     <None Remove="content\anotherTest.gltf" />
     <None Remove="content\back.jpg" />
+    <None Remove="content\bix - Kopieren.obj" />
     <None Remove="content\bix.obj" />
     <None Remove="content\bottom.jpg" />
     <None Remove="content\cube.glb" />
+    <None Remove="content\cubeNew.obj" />
     <None Remove="content\Daylight Box_Back.bmp" />
     <None Remove="content\Daylight Box_Bottom.bmp" />
     <None Remove="content\Daylight Box_Front.bmp" />
     <None Remove="content\Daylight Box_Left.bmp" />
     <None Remove="content\Daylight Box_Right.bmp" />
     <None Remove="content\Daylight Box_Top.bmp" />
+    <None Remove="content\depthLight.frag" />
+    <None Remove="content\depthLight.vert" />
     <None Remove="content\front.jpg" />
     <None Remove="content\gPassDef.frag" />
     <None Remove="content\gPassDef.vert" />
+    <None Remove="content\irradiance.frag" />
+    <None Remove="content\irradiance.vert" />
     <None Remove="content\left.jpg" />
     <None Remove="content\LessSkybox.frag" />
     <None Remove="content\lessSkybox.vert" />
+    <None Remove="content\lightBallsShader.frag" />
+    <None Remove="content\lightBallsShader.vert" />
     <None Remove="content\lightPassDef.frag" />
     <None Remove="content\lightPassDef.vert" />
     <None Remove="content\meshSkybox.obj" />
+    <None Remove="content\otherModelLess\testSchatten.bin" />
+    <None Remove="content\otherModelLess\testSchatten.gltf" />
+    <None Remove="content\otherModel\oof.bin" />
+    <None Remove="content\otherModel\oof.gltf" />
     <None Remove="content\postProcessing.frag" />
     <None Remove="content\postProcessing.vert" />
     <None Remove="content\right.jpg" />
     <None Remove="content\skybox.frag" />
     <None Remove="content\skybox.vert" />
+    <None Remove="content\Sphere - Kopieren.obj" />
+    <None Remove="content\Sphere.obj" />
+    <None Remove="content\suzanne.obj" />
+    <None Remove="content\testScene\scene.bin" />
+    <None Remove="content\testScene\scene.gltf" />
     <None Remove="content\top.jpg" />
     <None Remove="content\tssdBK.png" />
     <None Remove="content\tssdDN.png" />
@@ -103,11 +155,52 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CjClutter.ObjLoader" Version="1.0.0" />
-    <PackageReference Include="OpenTK" Version="4.4.0" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.0" />
+    <PackageReference Include="OpenTK" Version="4.5.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Framework\Framework.csproj" />
+    <ProjectReference Include="HDRIHelper\HDRIHelper.csproj">
+      <Aliases></Aliases>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="content\otherModelLess\defense_wall_02_rough_1k.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModelLess\normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModelLess\Rough.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModelLess\white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModel\defense_wall_02_diff_1k.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModel\defense_wall_02_nor_1k.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModel\defense_wall_02_rough_1k.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\normal_yee.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\RoughAlt.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\Rough.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="content\wubeFolder\square_floor_diff_1k.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -121,4 +214,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+
+
+	<Target Name="ChangeAliasesOfNugetRefs" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+		<ItemGroup>
+			<ReferencePath Condition="'%(FileName)' == 'Magick.NET-Q16-HDRI-AnyCPU'">
+				<Aliases>MagickImage16</Aliases>
+			</ReferencePath>
+		</ItemGroup>
+	</Target>
+
+
 </Project>
