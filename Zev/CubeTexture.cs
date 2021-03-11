@@ -26,11 +26,12 @@ namespace Example.Zev
             //GL.GenerateTextureMipmap(texture.Handle);
 
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureParameterName.ClampToEdge);
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureParameterName.ClampToEdge);
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureParameterName.ClampToEdge);
+
 
 
             Handle = handle;
@@ -45,6 +46,14 @@ namespace Example.Zev
         {
             Width = width;
             Height = height;
+        }
+
+        public void ReserveMipMapSpace(int levels)
+        {
+            GL.BindTexture(TextureTarget.TextureCubeMap, Handle);
+            var size = Math.Max(Width, Height);
+            levels = (int)MathF.Ceiling(MathF.Log10(size) / MathF.Log10(2f));
+            GL.TextureStorage2D(Handle, levels, Format, Width, Height);
         }
     }
 
@@ -119,18 +128,58 @@ namespace Example.Zev
     }
     public static class CubeTextureLoader
     {
-        public static CubeTexture MakeEmptyCubeMap(int width, int height)
+        public enum Quality { Int8,Float16, Float32}
+        public static CubeTexture MakeEmptyCubeMap(int width, int height, Quality quality = Quality.Float16, int mipmap = 0)
         {
-            var texture = new CubeTexture(SizedInternalFormat.Rgba16f);
-            GL.BindTexture(TextureTarget.TextureCubeMap, texture.Handle);
-
+            var internalFormat = SizedInternalFormat.Rgba16f;
             var pixelFormat = PixelInternalFormat.Rgba16f;
-            var pixelType = PixelFormat.Rgb;
+            var pixelFormatOpengl = PixelFormat.Rgba;
+            if (quality == Quality.Float32)
+            {
+                pixelFormat = PixelInternalFormat.Rgba32f;
+                internalFormat = SizedInternalFormat.Rgba32f;
+            }
+
+            CubeTexture texture = new CubeTexture(internalFormat);
+            GL.BindTexture(TextureTarget.TextureCubeMap, texture.Handle);
+            GL.TextureParameter(texture.Handle, TextureParameterName.TextureBaseLevel, 0);
+
+
+            texture.SetSize(width, height);
+            if (mipmap > 0)
+            {
+                
+                GL.TextureParameter(texture.Handle, TextureParameterName.TextureMaxLevel, mipmap);
+            }
+
             for (int i = 0; i < 6; ++i)
             {
-                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + (int)i, 0, pixelFormat, width,height, 0, pixelType, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + (int)i, 0, pixelFormat, width,height, 0, pixelFormatOpengl, PixelType.Float, IntPtr.Zero);
             }
-            texture.SetSize(width, height);
+
+            if(mipmap> 0)
+            {
+                texture.ReserveMipMapSpace(mipmap);
+            }
+
+            GL.TextureParameter(texture.Handle, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TextureParameter(texture.Handle, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TextureParameter(texture.Handle, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+
+            if (mipmap > 0)
+            {
+                GL.TextureParameter(texture.Handle, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+                GL.TextureParameter(texture.Handle, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                //GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
+                GL.GenerateTextureMipmap(texture.Handle);
+            }
+            else
+            {
+                GL.TextureParameter(texture.Handle, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TextureParameter(texture.Handle, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            }
+
+            
             return texture;
         }
         public static CubeTexture Load(CubeTextureLoaderData data)

@@ -32,9 +32,22 @@
     <EmbeddedResource Include="content\back.jpg" />
     <EmbeddedResource Include="content\bix - Kopieren.obj" />
     <EmbeddedResource Include="content\bix.obj" />
+    <EmbeddedResource Include="content\Shader\equi2Cube.frag" />
+    <EmbeddedResource Include="content\Shader\equi2Cube.vert" />
+    <EmbeddedResource Include="content\Shader\specular\preFilter.frag" />
+    <EmbeddedResource Include="content\Shader\specular\preFilter.vert" />
+    <EmbeddedResource Include="content\specularIBL.frag" />
+    <EmbeddedResource Include="content\specularIBL.vert" />
+    <EmbeddedResource Include="content\blur5.frag" />
     <EmbeddedResource Include="content\bottom.jpg" />
+    <EmbeddedResource Include="content\blur5.vert" />
+    <EmbeddedResource Include="content\combine.frag" />
     <EmbeddedResource Include="content\cube.glb" />
     <EmbeddedResource Include="content\cubeNew.obj" />
+    <EmbeddedResource Include="content\DamagedHelmet\glTF\DamagedHelmet.bin" />
+    <EmbeddedResource Include="content\DamagedHelmet\glTF\DamagedHelmet.gltf" />
+    <EmbeddedResource Include="content\DamagedHelmet\glTF\untitled.bin" />
+    <EmbeddedResource Include="content\DamagedHelmet\glTF\untitled.gltf" />
     <EmbeddedResource Include="content\Daylight Box_Back.bmp" />
     <EmbeddedResource Include="content\Daylight Box_Bottom.bmp" />
     <EmbeddedResource Include="content\Daylight Box_Front.bmp" />
@@ -44,12 +57,22 @@
     <EmbeddedResource Include="content\ferris_wheel_animated.bin" />
     <EmbeddedResource Include="content\ferris_wheel_animated.gltf" />
     <EmbeddedResource Include="content\front.jpg" />
+    <EmbeddedResource Include="content\Helmet\SciFiHelmet.bin" />
+    <EmbeddedResource Include="content\Helmet\SciFiHelmet.gltf" />
+    <EmbeddedResource Include="content\Helmet\untitled.bin">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\Helmet\untitled.gltf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="content\left.jpg" />
     <EmbeddedResource Include="content\irradiance.frag" />
     <EmbeddedResource Include="content\irradiance.vert" />
     <EmbeddedResource Include="content\depthLight.frag" />
     <EmbeddedResource Include="content\depthLight.vert" />
+    <EmbeddedResource Include="content\combine.vert" />
     <EmbeddedResource Include="content\lightPassDef.frag" />
+    <EmbeddedResource Include="content\lightPassOldDefOld.frag" />
     <EmbeddedResource Include="content\lightPassDef.vert" />
     <EmbeddedResource Include="content\meshSkybox.obj" />
     <EmbeddedResource Include="content\lessSkybox.frag" />
@@ -66,6 +89,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="content\otherModel\oof.bin" />
     <EmbeddedResource Include="content\otherModel\oof.gltf" />
+    <EmbeddedResource Include="content\rawPBR.frag" />
     <EmbeddedResource Include="content\right.jpg" />
     <EmbeddedResource Include="content\skybox.frag" />
     <EmbeddedResource Include="content\skybox.vert" />
@@ -75,6 +99,8 @@
     <EmbeddedResource Include="content\postProcessing.vert" />
     <EmbeddedResource Include="content\Sphere - Kopieren.obj" />
     <EmbeddedResource Include="content\Sphere.obj" />
+    <EmbeddedResource Include="content\Sphere\untitled.bin" />
+    <EmbeddedResource Include="content\Sphere\untitled.gltf" />
     <EmbeddedResource Include="content\suzanne.obj" />
     <EmbeddedResource Include="content\testScene\scene.bin" />
     <EmbeddedResource Include="content\testScene\scene.gltf" />
@@ -97,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="glTF2Loader" Version="1.1.1-alpha" />
+    <PackageReference Include="ImGui.NET" Version="1.78.0" />
     <PackageReference Include="OpenTK" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup>
@@ -105,9 +132,19 @@
     <None Remove="content\back.jpg" />
     <None Remove="content\bix - Kopieren.obj" />
     <None Remove="content\bix.obj" />
+    <None Remove="content\blur5.frag" />
+    <None Remove="content\blur5.vert" />
     <None Remove="content\bottom.jpg" />
+    <None Remove="content\combine.frag" />
+    <None Remove="content\combine.vert" />
     <None Remove="content\cube.glb" />
     <None Remove="content\cubeNew.obj" />
+    <None Remove="content\DamagedHelmet\glTF\DamagedHelmet.bin" />
+    <None Remove="content\DamagedHelmet\glTF\DamagedHelmet.gltf" />
+    <None Remove="content\DamagedHelmet\glTF\untitled.bin" />
+    <None Remove="content\DamagedHelmet\glTF\untitled.gltf" />
+    <None Remove="content\DamagedHelmet\glTF\untitled2.bin" />
+    <None Remove="content\DamagedHelmet\glTF\untitled2.gltf" />
     <None Remove="content\Daylight Box_Back.bmp" />
     <None Remove="content\Daylight Box_Bottom.bmp" />
     <None Remove="content\Daylight Box_Front.bmp" />
@@ -119,6 +156,10 @@
     <None Remove="content\front.jpg" />
     <None Remove="content\gPassDef.frag" />
     <None Remove="content\gPassDef.vert" />
+    <None Remove="content\Helmet\SciFiHelmet.bin" />
+    <None Remove="content\Helmet\SciFiHelmet.gltf" />
+    <None Remove="content\Helmet\untitled.bin" />
+    <None Remove="content\Helmet\untitled.gltf" />
     <None Remove="content\irradiance.frag" />
     <None Remove="content\irradiance.vert" />
     <None Remove="content\left.jpg" />
@@ -128,6 +169,7 @@
     <None Remove="content\lightBallsShader.vert" />
     <None Remove="content\lightPassDef.frag" />
     <None Remove="content\lightPassDef.vert" />
+    <None Remove="content\lightPassOldDefOld.frag" />
     <None Remove="content\meshSkybox.obj" />
     <None Remove="content\otherModelLess\testSchatten.bin" />
     <None Remove="content\otherModelLess\testSchatten.gltf" />
@@ -135,11 +177,21 @@
     <None Remove="content\otherModel\oof.gltf" />
     <None Remove="content\postProcessing.frag" />
     <None Remove="content\postProcessing.vert" />
+    <None Remove="content\rawPBR.frag" />
+    <None Remove="content\rawPBR.vert" />
     <None Remove="content\right.jpg" />
+    <None Remove="content\Shader\equi2Cube.frag" />
+    <None Remove="content\Shader\equi2Cube.vert" />
+    <None Remove="content\Shader\specular\preFilter.frag" />
+    <None Remove="content\Shader\specular\preFilter.vert" />
     <None Remove="content\skybox.frag" />
     <None Remove="content\skybox.vert" />
+    <None Remove="content\specularIBL.frag" />
+    <None Remove="content\specularIBL.vert" />
     <None Remove="content\Sphere - Kopieren.obj" />
     <None Remove="content\Sphere.obj" />
+    <None Remove="content\Sphere\untitled.bin" />
+    <None Remove="content\Sphere\untitled.gltf" />
     <None Remove="content\suzanne.obj" />
     <None Remove="content\testScene\scene.bin" />
     <None Remove="content\testScene\scene.gltf" />
@@ -154,9 +206,17 @@
     <None Remove="content\wubeFolder\wube.gltf" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="content\DamagedHelmet\glTF\untitled2.bin" />
+    <EmbeddedResource Include="content\DamagedHelmet\glTF\untitled2.gltf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="content\rawPBR.vert" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="CjClutter.ObjLoader" Version="1.0.0" />
     <PackageReference Include="OpenTK" Version="4.5.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Framework\Framework.csproj" />
@@ -165,10 +225,58 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Update="content\otherModelLess\defense_wall_02_rough_1k.png">
+    <None Update="content\DamagedHelmet\glTF\Default_albedo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\DamagedHelmet\glTF\Default_AO-Default_metalRoughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\DamagedHelmet\glTF\Default_AO.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\DamagedHelmet\glTF\Default_emissive.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\DamagedHelmet\glTF\Default_metalRoughness.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\DamagedHelmet\glTF\Default_normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\DamagedHelmet\glTF\SciFiHelmet_BaseColor_debug.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\HDRI\Alexs_Apt_2k.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\HDRI\large_corridor_2k.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Helmet\SciFiHelmet_AmbientOcclusion-SciFiHelmet_MetallicRoughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Helmet\SciFiHelmet_AmbientOcclusion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Helmet\SciFiHelmet_BaseColor_debug.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Helmet\SciFiHelmet_BaseColor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Helmet\SciFiHelmet_MetallicRoughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Helmet\SciFiHelmet_Normal.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="content\otherModelLess\normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModelLess\defense_wall_02_rough_1k.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\otherModelLess\normalaa.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="content\otherModelLess\Rough.png">
@@ -186,7 +294,19 @@
     <None Update="content\otherModel\defense_wall_02_rough_1k.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="content\testScene\normal_yee.png">
+    <None Update="content\Sphere\normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sphere\white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\normalyy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\normal_was.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\testScene\normal_yeee.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="content\testScene\RoughAlt.png">

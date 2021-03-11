@@ -19,7 +19,7 @@ namespace Framework
 				case 4: format = PixelFormat.Rgba; internalFormat = SizedInternalFormat.Rgba8; break;
 				default: throw new ArgumentOutOfRangeException("Unexpected image format");
 			}
-			image.Flip();
+			//image.Flip();
 			var bytes = image.GetPixelsUnsafe().ToArray();
 			var texture = new Texture(image.Width, image.Height, internalFormat)
 			{

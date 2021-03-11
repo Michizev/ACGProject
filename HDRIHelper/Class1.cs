@@ -18,7 +18,7 @@ namespace Zev.HDRIHelper
         public int Height { get; }
         public float[] Pixels { get; }
     }
-    public class HDRILoader
+    public static class HDRILoader
     {
         public static HDRIimage LoadImageAsFloatArray(Stream stream)
         {
@@ -32,6 +32,21 @@ namespace Zev.HDRIHelper
             var bytes = image.GetPixelsUnsafe().ToArray();
 
             return new HDRIimage(image.Width, image.Height, bytes);
+        }
+        public static HDRIimage LoadImageAsFloatArray(string path)
+        {
+            using var image = new MagickImage(path)
+            {
+                
+            };
+
+
+            image.Flip();
+            var bytes = image.GetPixelsUnsafe().ToArray();
+            for (int i = 0; i < bytes.Length; i++) bytes[i] *= 0.0001f;
+
+            return new HDRIimage(image.Width, image.Height, bytes);
+         
         }
     }
 }

@@ -9,6 +9,7 @@ uniform samplerCube skybox;
 
 out vec4 outputColor;
 
+float gamma = 2.2;
 void main() 
 {
 	outputColor = texture(skybox,i.uv);

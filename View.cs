@@ -1,7 +1,9 @@
+using Dear_ImGui_Sample;
 using Example.Zev;
 using Example.Zev.Extensions;
 using Framework;
 using glTFLoader.Schema;
+using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -11,147 +13,31 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Zev;
+using Zev.HDRIHelper;
 
 namespace Example
 {
-    interface IResizeable
-    {
-        public void Resize(int width, int height);
-    }
-    interface ICacheMaker
-    {
-        public FrameBufferGL CreateCache(int width, int height);
-    }
-    class CacheManager : IResizeable, IDisposable
-    {
-        public ICacheMaker maker;
-        public FrameBufferGL cache;
-
-        public CacheManager(ICacheMaker maker)
-        {
-            this.maker = maker;
-            cache = maker.CreateCache(2, 2);
-        }
-
-        public void Dispose()
-        {
-            ((IDisposable)cache).Dispose();
-        }
-
-        public void Resize(int width, int height)
-        {
-            cache.Dispose();
-            cache = maker.CreateCache(width, height);
-        }
-
-    }
-    class DepthCache : ICacheMaker
-    {
-        public FrameBufferGL CreateCache(int width, int height)
-        {
-            var cache = new FrameBufferGL(true);
-
-            //cache.Attach(new RenderBufferGL(RenderbufferStorage.DepthComponent32, width, height), FramebufferAttachment.DepthAttachment);
-            cache.Attach(new Framework.Texture(width, height, Framework.Texture.DepthComponent32f), FramebufferAttachment.DepthAttachment);
-            cache.Attach(new Framework.Texture(width, height, SizedInternalFormat.R16f), FramebufferAttachment.ColorAttachment0);
-            return cache;
-        }
-    }
-    class BaseCache : IResizeable, IDisposable
-    {
-        protected CacheManager cache;
-
-        public BaseCache(ICacheMaker maker)
-        {
-            this.cache = new CacheManager(maker);
-        }
-
-        public void Resize(int width, int height)
-        {
-            cache.Resize(width, height);
-        }
-
-        public void Dispose()
-        {
-            ((IDisposable)cache).Dispose();
-        }
-
-        public FrameBufferGL Cache => cache.cache;
-    }
-    class ShadowMap : BaseCache
-    {
-        public ShadowMap() : base(new DepthCache())
-        {
-
-        }
-
-    }
-
-    class GLTFImage
-    {
-        public string Name { get; private set; }
-
-    }
-
-    public class ViewportHelper
-    {
-        private int[] viewport;
-        
-        public void GetCurrentViewPort()
-        {
-            viewport = new int[4];
-            GL.GetInteger(GetPName.Viewport, viewport);
-        }
-
-        public void SetLastViewport()
-        {
-            GL.Viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-        }
-    }
-    public class InterfaceSearcher
-    {
-        public static void SearchForDisposeable(Object obj)
-        {
-            var fields = obj.GetType().GetFields(
-                                     BindingFlags.NonPublic | BindingFlags.Public |
-                                     BindingFlags.Instance);
-
-            var props = obj.GetType().GetProperties(
-                         BindingFlags.NonPublic | BindingFlags.Public |
-                         BindingFlags.Instance);
-
-            Console.WriteLine("Fields");
-            var t = typeof(IDisposable);
-            foreach (var f in fields)
-            {
-                if (f.FieldType.GetInterfaces().Contains(t))
-                {
-                    Console.Write("DISPOSEABLE : ");
-                }
-                Console.WriteLine(f);
-            }
-            Console.WriteLine("Props");
-            foreach (var f in props)
-            {
-
-                if (f.PropertyType.GetInterfaces().Contains(t))
-                {
-                    Console.Write("DISPOSEABLE : ");
-                }
-                Console.WriteLine(f);
-            }
-        }
-    }
+    
 
     internal class View : Disposable
     {
         private const string ResourceDir = nameof(Example) + ".content.";
         GLTFState state;
         private LightPassShader lightDefShader;
-        private ShadowMap map;
+        private ShadowMap shadowMapDirectionalLight;
+
+        public bool RenderGUI { get; set; }
+
+        public float Exposure { get; set; } = 1.0f;
+
+        
 
         public View()
         {
+
+            GL.Enable(EnableCap.TextureCubeMapSeamless);
+
+
             gbuffer = new GBUffer();
             state = new GLTFState();
             lightDefShader = new LightPassShader(ResourceDir);
@@ -163,7 +49,9 @@ namespace Example
 
             wube = "testScene.scene.gltf";
             //wube = "otherModelLess.testSchatten.gltf";
-
+            //wube = "Sphere.untitled.gltf";
+            //wube = "Helmet.untitled.gltf";
+            wube = "DamagedHelmet.glTF.untitled2.gltf";
             var target = ResourceDir + wube;
             var baseDir = ExtractBaseDir(target);
 
@@ -172,7 +60,7 @@ namespace Example
                 _model = new GltfModel(stream, (string externalName) => Resource.LoadStream(baseDir + externalName));
             }
 
-            map = new ShadowMap();
+            shadowMapDirectionalLight = new ShadowMap();
 
             var path = wube;
             path = path.Replace('.', '\\');
@@ -224,7 +112,8 @@ namespace Example
 
 
             overlayCacheTexture = new TextureQuad(-1, -1, 0.5f, 0.5f);
-            overlayTextureRight = new TextureQuad(0.5f, -1, 0.5f, 0.5f, "color = color*0.5+vec4(0.5);");
+            //overlayTextureRight = new TextureQuad(0.5f, -1, 0.5f, 0.5f, "color = color*0.5+vec4(0.5);");
+            overlayTextureRight = new TextureQuad(0.5f, -1, 0.5f, 0.5f);
             overlayDepthTexture = new TextureQuad(-0.2f, -1, 0.5f, 0.5f, "color = vec4(vec3(pow(color.r, 32.0)), 1.0);");
 
             var shaderPostProcessingVars = new ShaderProgramVariables(_PostProcessProgram);
@@ -257,21 +146,26 @@ namespace Example
                     break;
             }
 
-
-
-
+            texCalc = new TextureCalculator();
+            var hdriFilename = "large_corridor_2k.hdr";
+            //hdriFilename = "Alexs_Apt_2k.hdr";
+            var hdri = "content/" + "HDRI/" + hdriFilename;
+            CreateCubeMapFromHDRI(hdri);
 
             //cubeData.GenerateNames("Daylight Box_", "bmp");
 
 
 
-            skyboxTexture = CubeTextureLoader.Load(cubeData);
+            //skyboxTexture = CubeTextureLoader.Load(cubeData);
 
+            prefilterSpecularMap = texCalc.CalculateSpecularPrefilterMap(skyboxTexture);
 
-            texCalc = new TextureCalculator();
+            
+            
             irradianceMap = texCalc.CalculateIrradianceMap(skyboxTexture);
 
             box = new Skybox(skyboxTexture);
+            //box = new Skybox(prefilterSpecularMap);
             //box = new Skybox(irradianceMap);
             #region Load Sphere
             shaderLightBallsInstanced = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "lightBallsShader"));
@@ -297,11 +191,11 @@ namespace Example
                 //instanceLightPositions = new Vector3[] { new Vector3(-2f, 0f, 0f) };
                 //var lightSpherePositionBuffer = lightSphere.AddAttribute(lightInstancePos, instanceLightPositions);
                 //var lightSpherePositionBuffer = lightSphere.AddAttribute(lightInstancePos, instanceLightPositions);
-                
-                    var attrib = lightInstancePos;
-                    lightSpherePositionBuffer = lightSphere.AddAttribute(attrib.Location, attrib.Components, attrib.Type, instanceLightPositions, true);
-                
-                
+
+                var attrib = lightInstancePos;
+                lightSpherePositionBuffer = lightSphere.AddAttribute(attrib.Location, attrib.Components, attrib.Type, instanceLightPositions, true);
+
+
                 for (int i = 0; i < instanceLightPositions.Length; i++)
                 {
                     instanceLightPositions[i].X *= 2;
@@ -315,7 +209,8 @@ namespace Example
             //-52.5
 
             //ele 36.66667
-
+            rawPBR = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "rawPBR"));
+            rawPBRVars = new ShaderProgramVariables(rawPBR);
 
             directionalLight = new OrbitingCamera(OrbitingCamera.Distance, -52.5f, 36.66667f);
 
@@ -327,10 +222,59 @@ namespace Example
             var depthShaderVars = new ShaderProgramVariables(depthShader);
 
 
+            fullCache = new HDRBuffer();
+            fullCache2 = new HDRBuffer();
 
+            SetupCombineShader();
+
+            SetupBlurShader();
 
             GL.Enable(EnableCap.CullFace); //TODO: switch on/off; with differences in shadow quality can you see?
             GL.Enable(EnableCap.DepthTest);
+        }
+
+        private void CreateCubeMapFromHDRI(string hdri)
+        {
+            var img = HDRILoader.LoadImageAsFloatArray(hdri);
+            var hdriImg = texCalc.HDRIToTexture(img);
+            skyboxTexture = texCalc.TurnHDRIIntoCubemap(hdriImg);
+            /*
+            using (var s = File.OpenRead(hdri))
+            {
+                //TODO turn HDRI to Cubemap
+                var img = HDRILoader.LoadImageAsFloatArray(s);
+                var hdriImg = texCalc.HDRIToTexture(img);
+                skyboxTexture = texCalc.TurnHDRIIntoCubemap(hdriImg);
+            }
+            */
+        }
+
+        private void SetupCombineShader()
+        {
+            combineShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "combine"));
+            var combineShaderVars = new ShaderProgramVariables(combineShader);
+
+            /*
+             * 
+             * uniform sampler2D scene;
+uniform sampler2D bloomScene;
+uniform float exposure;
+            */
+            combineScreen = combineShaderVars.Get<UniformTexture>("scene");
+            combineBloom = combineShaderVars.Get<UniformTexture>("bloomScenee");
+            combineExposure = combineShaderVars.Get<UniformFloat>("exposure");
+        }
+
+        private void SetupBlurShader()
+        {
+            blurShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "blur5"));
+            var blurShaderVars = new ShaderProgramVariables(blurShader);
+
+            blurInput = blurShaderVars.Get<UniformTexture>("image");
+            blurDirection = blurShaderVars.Get<UniformBool>("horizontal");
+
+            blurOne = new SingleHDRBuffer();
+            blurTwo = new SingleHDRBuffer();
         }
 
         private static string ExtractBaseDir(string target)
@@ -348,12 +292,15 @@ namespace Example
 
         public OrbitingCamera OrbitingCamera { get; } = new OrbitingCamera(10f);
         public bool Active { get; set; } = true;
+        public bool RenderExtraWindows { get; internal set; }
 
         private readonly GltfModel _model;
         private readonly GltfModelRenderer _modelRenderer;
         private readonly ShaderProgram _shaderProgram;
 
         private readonly ShaderProgram _PostProcessProgram;
+        private readonly ShaderProgram rawPBR;
+        private readonly ShaderProgramVariables rawPBRVars;
         private Vector3 sceneMin;
         private Vector3 sceneMax;
         private FrameBufferGL cache;
@@ -393,20 +340,23 @@ namespace Example
         {
 
             if (!Active) return;
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            texCalc.CalculateSpecularPrefilterMap(skyboxTexture);
 
             deltaTime = time - lastTime;
             lastTime = time;
-            
+
             var attrib = lightInstancePos;
 
-            angle += deltaTime*0.001;
-            var fullRadi = 2*Math.PI;
+            angle += deltaTime * 0.001;
+            var fullRadi = 2 * Math.PI;
             if (angle > fullRadi) angle -= (float)fullRadi;
 
             var rot = Matrix4.CreateRotationY((float)angle);
             var poss = Matrix4.CreateTranslation(6.5f, 1.5f, 0);
 
-            var combined = poss*rot;
+            var combined = poss * rot;
             var newPos = combined.ExtractTranslation();
             //Console.WriteLine(angle);
             instanceLightPositions[0] = newPos;
@@ -427,13 +377,31 @@ namespace Example
             far = 50f;
             OrbitingCamera.Projection = Matrix4.CreatePerspectiveFieldOfView(1f, _aspect, near, far);
             var lightSize = 20;
-            directionalLight.Projection = Matrix4.CreateOrthographic(lightSize * _aspect, lightSize, 0.1f , 50);
+            directionalLight.Projection = Matrix4.CreateOrthographic(lightSize * _aspect, lightSize, 0.1f, 50);
             //OrbitingCamera.Projection = Matrix4.CreatePerspectiveFieldOfView(1f, _aspect,0.1f, 10);
             //directionalLight.Projection = Matrix4.CreatePerspectiveFieldOfView(1f, _aspect, 0.1f, 100);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            /*
+            var lightColors2 = new List<Vector3> { (1, 0.7f, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1), };
 
+            for (int i = 0; i < lightColors2.Count; i++) lightColors2[i] *= 100;
+            rawPBR.Bind();
+            rawPBR.Uniform("viewProjection", OrbitingCamera.ViewProjection);
+            rawPBR.Uniform("lightColors", lightColors2.ToArray());
+            rawPBR.Uniform("lightPositions", instanceLightPositions);
 
+            rawPBR.Uniform("ao", new Vector3(0.1f,0.1f,0.1f));
+            foreach (var (globalTransform, drawable, material) in _modelRenderer.TraverseSceneGraphDrawables())
+            {
+                rawPBR.Uniform("model", globalTransform);
+                drawable.Draw();
+            }
+            */
+
+            //rawPBRVars.Get("")
+
+            //return;
             #region Draw G Buffer
             //_shaderProgram.Bind();
             gbuffer.Bind();
@@ -461,9 +429,9 @@ namespace Example
             #region Draw Directional Light Depth
             var cullface = false;
 
-            if(cullface)GL.CullFace(CullFaceMode.Front);
+            if (cullface) GL.CullFace(CullFaceMode.Front);
             depthShader.Bind();
-            map.Cache.Draw(() =>
+            shadowMapDirectionalLight.Cache.Draw(() =>
             {
                 GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
                 var viewPro = directionalLight.ViewProjection;
@@ -475,7 +443,7 @@ namespace Example
                     drawable.Draw();
                 }
             });
-            if (cullface)GL.CullFace(CullFaceMode.Back);
+            if (cullface) GL.CullFace(CullFaceMode.Back);
 
 
             emptyVA.Bind();
@@ -483,13 +451,22 @@ namespace Example
 
             #endregion
 
+
+
             #region Draw PBR
+
+            //Copy Depth in Buffer
+            GL.BlitNamedFramebuffer(gbuffer.cache.Handle, fullCache.Cache.Handle, 0, 0, fwidth, fheight, 0, 0, fwidth, fheight, ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit, BlitFramebufferFilter.Nearest);
+
             var lightPos = instanceLightPositions;
             var lightColors = new List<Vector3> { (1, 0.7f, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1), };
-            for(int i=0;i<lightColors.Count;i++)
+            
+            
+            for (int i = 0; i < lightColors.Count; i++)
             {
-                lightColors[i] *= 10;
+                lightColors[i] *= 1;
             }
+            
             var lightPosLocation = lightDefShader.Shader.CheckedUniformLocation("lightPositions[0]");
             var lightColorsLocation = lightDefShader.Shader.CheckedUniformLocation("lightColors[0]");
 
@@ -498,7 +475,7 @@ namespace Example
             if (lightColorsLocation != -1)
                 lightDefShader.Shader.Uniform(lightColorsLocation, lightColors.ToArray());
 
-            
+
 
             lightDefShader.AlbedoMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment2));
             lightDefShader.NormalMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1));
@@ -514,9 +491,11 @@ namespace Example
 
             #region Directional Light Variables
             var dirLightPos = directionalLight.CalcPosition();
-            if(lightDefShader.DirectionalLightDirection != null)
+            if (lightDefShader.DirectionalLightDirection != null)
             {
                 var dir = dirLightPos - directionalLight.Target;
+                //Console.WriteLine("LIGHT DIR: " + dir.Normalized() + " VIEW DIR: " + OrbitingCamera.CalcPosition().Normalized());
+
                 lightDefShader.DirectionalLightDirection.Value = dir.Normalized(); //dir.Normalized();
             }
             //lightDefShader.DirectionalLightMatrix.Value = directionalLight.ViewProjection;
@@ -525,7 +504,7 @@ namespace Example
                 lightDefShader.DirectionalLightMatrix.Value = directionalLight.ViewProjection;
             }
 
-            lightDefShader.DirectionalLightShadowMap?.Bind(map.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+            lightDefShader.DirectionalLightShadowMap?.Bind(shadowMapDirectionalLight.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
 
             if (lightDefShader.CameraPos != null)
             {
@@ -535,9 +514,13 @@ namespace Example
             }
             #endregion
 
-            GL.DepthMask(false);
-            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
-            GL.DepthMask(true);
+            fullCache.Cache.Draw(() =>
+            {
+                GL.Clear(ClearBufferMask.ColorBufferBit);
+                GL.DepthMask(false);
+                GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+                GL.DepthMask(true);
+            });
 
             #endregion
 
@@ -554,29 +537,101 @@ namespace Example
 
                 lightSphere.VertexArray.Bind();
                 //GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, lightSphere.IndexCount, instanceLightPositions.Length);
-                GL.DrawElementsInstanced(PrimitiveType.Triangles, lightSphere.IndexCount, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceLightPositions.Length);
+                fullCache.Cache.Draw(() =>
+                {
+                    GL.DrawElementsInstanced(PrimitiveType.Triangles, lightSphere.IndexCount, DrawElementsType.UnsignedInt, IntPtr.Zero, instanceLightPositions.Length);
+                });
             }
 
             #endregion
             #region Draw Skybox
+
             var drawSkybox = true;
             if (drawSkybox)
             {
-                GL.DepthMask(false);
-                GL.DepthFunc(DepthFunction.Equal);
-                box.Draw(OrbitingCamera);
-                GL.DepthFunc(DepthFunction.Less);
-                GL.DepthMask(true);
+                fullCache.Cache.Draw(() =>
+                {
+                    GL.DepthMask(false);
+                    GL.DepthFunc(DepthFunction.Equal);
+                    box.Draw(OrbitingCamera);
+                    GL.DepthFunc(DepthFunction.Less);
+                    GL.DepthMask(true);
+                });
             }
 
             #endregion
 
+            #region Apply Bloom
+            var textureToBlur = fullCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment1);
+
+            var currentShader = 1;
+
+            SingleHDRBuffer GetNextBuffer()
+            {
+                if (currentShader == 0)
+                {
+                    currentShader = 1;
+                    return blurOne;
+                }
+                else
+                {
+                    currentShader = 0;
+                    return blurTwo;
+                }
+            }
 
 
-            overlayCacheTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0));
-            //overlayDepthTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.DepthAttachment));
-            overlayDepthTexture.Draw(map.Cache.GetTexture(FramebufferAttachment.DepthAttachment));
-            overlayTextureRight.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1));
+            emptyVA.Bind();
+            var blurDir = false;
+            blurShader.Bind();
+            blurInput?.Bind(fullCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment1));
+            var currenBlurCache = blurOne;
+            for (var i = 0; i < 10; i++)
+            {
+                if (blurDirection != null)
+                {
+                    blurDirection.Value = blurDir;
+                    blurDir = !blurDir;
+                }
+                currenBlurCache.Cache.Draw(() =>
+                {
+                    GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                    GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+                });
+                blurInput?.Bind(currenBlurCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+                currenBlurCache = GetNextBuffer();
+
+            }
+            #endregion
+
+
+            #region Combine and draw to screen Quad
+
+            emptyVA.Bind();
+            combineShader.Bind();
+
+            combineBloom?.Bind(currenBlurCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+            combineScreen?.Bind(fullCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+
+            if (combineExposure != null)
+                combineExposure.Value = Exposure;
+
+
+            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+            #endregion
+
+            if (RenderExtraWindows)
+            {
+                //overlayCacheTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+                //overlayCacheTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment2));
+                overlayCacheTexture.Draw(fullCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+                //overlayDepthTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.DepthAttachment));
+                overlayDepthTexture.Draw(shadowMapDirectionalLight.Cache.GetTexture(FramebufferAttachment.DepthAttachment));
+                overlayTextureRight.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1));
+            }
+            if(RenderGUI)RenderIMGUI();
+
+
 
             //texCalc.CalculateIrradianceMap(skyboxTexture);
             //TODO: 1. Implement motion blur with temporal coherence
@@ -625,18 +680,30 @@ namespace Example
             overlayCacheTexture.Draw(currentBuffer.GetTexture(FramebufferAttachment.ColorAttachment1));
 
             */
-            }
+        }
+
+        private void RenderIMGUI()
+        {
+            
+            ImGui.ShowDemoWindow();
+            imguiController.Render();
+
+            GL.Disable(EnableCap.Blend);
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+        }
 
         private void DrawData(float time)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            gbuffer.Program.Uniform("camera", OrbitingCamera.ViewProjection);
+            gbuffer.Program.Uniform("viewProjection", OrbitingCamera.ViewProjection);
             gbuffer.Program.Uniform("cameraPos", OrbitingCamera.CalcPosition());
             //_shaderProgram.Uniform("cameraPos", OrbitingCamera.CalcPosition());
 
             //var locBaseColor = _shaderProgram.CheckedUniformLocation("baseColor");
-            var locWorld = gbuffer.Program.CheckedUniformLocation("world");
-
+            var locWorld = gbuffer.Program.CheckedUniformLocation("model");
+            gbuffer.Program.Uniform("view", OrbitingCamera.View);
+            gbuffer.Program.Uniform("projection", OrbitingCamera.Projection);
             /*
              * uniform vec3[4] lightPositions;
 uniform vec3[4] lightColors;
@@ -696,7 +763,15 @@ uniform vec3[4] lightColors;
 
                 gbuffer.Resize(width, height);
 
-                map.Resize(width, height);
+                shadowMapDirectionalLight.Resize(width, height);
+
+                fullCache.Resize(width, height);
+                fullCache2.Resize(width, height);
+
+                blurOne.Resize(width, height);
+                blurTwo.Resize(width, height);
+
+                imguiController.WindowResized(width, height);
             }
         }
 
@@ -720,14 +795,27 @@ uniform vec3[4] lightColors;
         private Skybox box;
         private ShaderProgram shaderLightBallsInstanced;
         private MeshGL lightSphere;
+        public ImGuiController imguiController;
         private GBUffer gbuffer;
         private GLTFTextures textures;
         private Vector3[] instanceLightPositions;
         private TextureCalculator texCalc;
+        private CubeTexture prefilterSpecularMap;
         private CubeTexture irradianceMap;
         private BufferGL lightSpherePositionBuffer;
         private VertexAttrib lightInstancePos;
         private ShaderProgram depthShader;
+        private HDRBuffer fullCache;
+        private HDRBuffer fullCache2;
+        private ShaderProgram combineShader;
+        private UniformTexture combineScreen;
+        private UniformTexture combineBloom;
+        private UniformFloat combineExposure;
+        private ShaderProgram blurShader;
+        private UniformTexture blurInput;
+        private UniformBool blurDirection;
+        private SingleHDRBuffer blurOne;
+        private SingleHDRBuffer blurTwo;
 
         private void DrawNewFrame(float time)
         {

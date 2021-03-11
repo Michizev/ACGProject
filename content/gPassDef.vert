@@ -2,9 +2,10 @@
 #pragma optimize (off)
 //!#define SOLUTION
 
-uniform mat4 camera = mat4(1.0);
-uniform mat4 world = mat4(1.0);
+uniform mat4 view = mat4(1.0);
+uniform mat4 projection = mat4(1.0);
 uniform mat4 model = mat4(1.0);
+uniform mat4 viewProjection = mat4(1.0);
 
 in vec3 position;
 in vec3 normal;
@@ -27,14 +28,16 @@ out Data
 
 void main()
 {
-	vec3 worldNormal = normalize(mat3(world) * normal);
-	o.normal = worldNormal;
-	vec4 position_world = world * vec4(position,1);
+	mat4 modelView = view*model;
+	vec3 worldNormal = normalize(mat3(modelView) * normal);
+	
+	vec4 position_world = model * vec4(position,1);
 	o.positionRaw = position;
 	o.position = position_world;
 	o.texCoords = texcoord_0;
-	mat4 modelViewProjection = camera*world;
-	gl_Position = camera * position_world;
+
+	mat4 modelViewProjection = viewProjection*model;
+	gl_Position = viewProjection * position_world;
 
 	//Case forward renderer:
 	
@@ -46,9 +49,10 @@ void main()
 	vec3 N = normalize(vec3(modelViewProjection * vec4(normal,    0.0)));
 	*/
 	//mat4 normalMatrix = transpose(inverse(world));#
-	mat4 normalMatrix = transpose(inverse(world));
-
-    vec3 worldTangent = normalize(mat3(world)*tangent);
+	/*
+	mat4 normalMatrix = transpose(inverse(modelView));
+	
+    vec3 worldTangent = normalize(mat3(model)*tangent);
 	
 	vec3 T = normalize(vec3(normalMatrix * vec4(worldTangent,   0.0)));
 	vec3 B = normalize(vec3(normalMatrix * vec4(cross(worldNormal,worldTangent), 0.0)));
@@ -60,21 +64,34 @@ void main()
     mat3 TBN = mat3(Tangent, Bitangent, Normal);
 	*/
 
-	mat3 TBN = mat3(T, B, N);
+	//mat3 TBN = mat3(T, B, N);
 
-	o.TBN = TBN;
-	o.tangent = worldTangent;
+	//o.TBN = TBN;
+	//o.tangent = worldTangent;
+
+
 	/*
 	vec3 TT = normalize(vec3(model * vec4(tangent,   0.0)));
 	vec3 BT = normalize(vec3(model * vec4(cross(normal,tangent), 0.0)));
 	vec3 NT = normalize(vec3(model * vec4(normal,    0.0)));
 	*/
-	vec3 TT   = normalize(mat3(world) * tangent);
-    vec3 BT   = normalize(mat3(world) * cross(normal,tangent));
-    vec3 NT   = normalize(mat3(world) * normal);
-	mat3 TTBN = mat3(TT, BT, NT);
+	//vec3 TT   = normalize(mat3(model) * tangent);
 
-	o.tangentCameraPos = TTBN * cameraPos;
-	o.tangentPos = TTBN * position_world.xyz;
+	vec3 T   = normalize(vec3(model * vec4(tangent,0)));
 
+    //vec3 NT   = normalize(mat3(model) * normal);
+	vec3 N   = normalize(vec3(model * vec4(normal,0)));
+	// re-orthogonalize T with respect to N
+	T = normalize(T - dot(T, N) * N);
+	// then retrieve perpendicular vector B with the cross product of T and N
+	vec3 B = cross(T, T);
+
+	mat3 TBN = mat3(T, B, N);
+
+	o.tangentCameraPos = TBN * cameraPos;
+	o.tangentPos = TBN * position_world.xyz;
+
+	o.normal = normal;
+	o.tangent = tangent;
+	o.TBN = TBN;
 }

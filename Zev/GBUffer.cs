@@ -46,6 +46,7 @@ namespace Example
 			//Console.WriteLine(par);
 			//DepthBuffer
 			//Framework.Texture.DepthComponent32f
+			//cache.Attach(new Framework.Texture(width, height, (SizedInternalFormat)All.DepthComponent32), FramebufferAttachment.DepthAttachment);
 			cache.Attach(new Framework.Texture(width, height, (SizedInternalFormat)All.DepthComponent32), FramebufferAttachment.DepthAttachment);
 			//Position Color Buffer
 			cache.Attach(new Framework.Texture(width, height, SizedInternalFormat.Rgba32f), FramebufferAttachment.ColorAttachment0);

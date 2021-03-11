@@ -27,6 +27,8 @@ uniform sampler2D metalRoughnessMap;
 uniform sampler2D normalMap;
 uniform float normalStrength = 0.00001;
 
+uniform mat4 model;
+
 //Code from http://ogldev.atspace.co.uk/www/tutorial26/tutorial26.html
 vec3 CalcBumpedNormal()
 {
@@ -82,10 +84,12 @@ vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
 
     return currentTexCoords;
 }
-
+const float gamma = 2.2;
 void main()
 {   
     vec3 viewDir   = normalize(i.tangentPos - i.tangentCameraPos);
+
+    //vec3 viewDir   = normalize(i.positionRaw - cameraPos);
 
     PositionRaw = i.positionRaw;
     //vec3 viewDir   = normalize(i.position - cameraPos);
@@ -106,21 +110,30 @@ void main()
     // store the fragment position vector in the first gbuffer texture
     Position = i.position;
 
+
     // also store the per-fragment normals into the gbuffer
-    vec3 realNormal = normalize(i.normal);
+    //Normal Mapping code
+    //vec3 realNormal = normalize(i.normal);
+
     vec3 normaltex = texture(normalMap, texCoords).rgb;
 	vec3 normal = normaltex * 2.0 - 1.0;   
+    Normal = normalize(i.TBN*normal);
+
+    //Normal = realNormal;
+    //Normal = normalize(normal);
 	//Normal = normalize(i.TBN * normal); 
 
 
     //Normal = normalize(i.TBN*normaltex);
-    Normal = i.TBN*normal;
+    
+    //Normal = i.TBN*normal;
+    
 
     //Normal = i.TBN*vec3(texCoords,0);
 
     //Normal = CalcBumpedNormal();
     // and the diffuse per-fragment color
-    AlbedoSpec.rgb = texture(albedoMap, texCoords).rgb;
+    AlbedoSpec.rgb = pow(texture(albedoMap, texCoords).rgb,vec3(gamma));
     AlbedoSpec.a = 1;
 
     //AlbedoSpec.rgb = vec3(texCoords,0);

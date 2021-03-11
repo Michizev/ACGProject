@@ -22,7 +22,14 @@ namespace Example
 			if (_model.Gltf.Images == null) return;
 			foreach (var i in _model.Gltf.Images)
 			{
-				imageNamesPath.Add(i.Name, i.Uri);
+				var name = i.Name;
+				if(i.Name == null)
+                {
+					name = i.Uri;
+                }
+
+
+				imageNamesPath.Add(name, i.Uri);
 			}
 
 			//var imgs = new Dictionary<int,ImageMagick.MagickImage>();
@@ -33,6 +40,7 @@ namespace Example
 				if (t.Source is not null)
 				{
 					var imgName = _model.Gltf.Images[(int)t.Source].Name;
+					if (imgName == null) imgName = _model.Gltf.Images[(int)t.Source].Uri;
 					var path = rootPath + '\\' + imageNamesPath[imgName];
 					Console.WriteLine(path);
 					using var s = File.OpenRead(path);
@@ -43,6 +51,7 @@ namespace Example
 
 				
 						var tex = Framework.TextureLoader.Load(s);
+					tex.Function = OpenTK.Graphics.OpenGL4.TextureWrapMode.Repeat;
 						TextureToTextureHandle.Add(textureID++, tex);
 					
 				}
