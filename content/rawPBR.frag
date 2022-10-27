@@ -69,7 +69,6 @@ void main()
         float NdotL = max(dot(N, L), 0.0);                
         Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
 
-        //fragColor = vec4(H, 1.0);
     }   
   
     vec3 ambient = vec3(0.03) * albedo * ao;
@@ -77,8 +76,6 @@ void main()
 	
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));  
-   
-    //fragColor = vec4(H, 1.0);
 }  
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {

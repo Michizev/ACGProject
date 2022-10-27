@@ -118,16 +118,8 @@ void main()
     }else{
         Emissive = vec4(0);
     }
-
-    
-    /*
-    if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
-    discard;
-    */
-
     // store the fragment position vector in the first gbuffer texture
     Position = i.position;
-
 
     // also store the per-fragment normals into the gbuffer
     //Normal Mapping code
@@ -138,31 +130,11 @@ void main()
 	vec3 normal = normaltex * 2.0 - 1.0;   
     Normal = normalize(i.TBN*normal);
 
-    //Normal = realNormal;
-    //Normal = normalize(normal);
-	//Normal = normalize(i.TBN * normal); 
-
-
-    //Normal = normalize(i.TBN*normaltex);
-    
-    //Normal = i.TBN*normal;
-    
-
-    //Normal = i.TBN*vec3(texCoords,0);
-
-    //Normal = CalcBumpedNormal();
     // and the diffuse per-fragment color
     vec4 tex = texture(albedoMap, texCoords).rgba;
     AlbedoSpec = vec4(pow(tex.rgb,vec3(gamma)),tex.a);
-    //AlbedoSpec.rgb = texture(albedoMap, texCoords).rgb;
-
-
-
-    //AlbedoSpec.rgb = vec3(texCoords,0);
 
     MetalRoughness.rgb = texture(metalRoughnessMap, texCoords).rgb;
     if(!hasAO) MetalRoughness.r = 1;
     MetalRoughness.a = 1;
-    // store specular intensity in gAlbedoSpec's alpha component
-    //AlbedoSpec.a = texture(specularTexture, i.texCoords).r;
 }  

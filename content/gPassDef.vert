@@ -43,44 +43,6 @@ void main()
 	mat4 modelViewProjection = viewProjection*model;
 	gl_Position = viewProjection * position_world;
 
-	//Case forward renderer:
-	
-	
-	//NormalCalc
-	/*
-	vec3 T = normalize(vec3(modelViewProjection * vec4(tangent,   0.0)));
-	vec3 B = normalize(vec3(modelViewProjection * vec4(cross(normal,tangent), 0.0)));
-	vec3 N = normalize(vec3(modelViewProjection * vec4(normal,    0.0)));
-	*/
-	//mat4 normalMatrix = transpose(inverse(world));#
-	/*
-	mat4 normalMatrix = transpose(inverse(modelView));
-	
-    vec3 worldTangent = normalize(mat3(model)*tangent);
-	
-	vec3 T = normalize(vec3(normalMatrix * vec4(worldTangent,   0.0)));
-	vec3 B = normalize(vec3(normalMatrix * vec4(cross(worldNormal,worldTangent), 0.0)));
-	vec3 N = normalize(vec3(normalMatrix * vec4(worldNormal,    0.0)));
-	
-	/*
-	vec3 T = normalize(Tangent - dot(Tangent, Normal) * Normal);
-    vec3 B = cross(Tangent, Normal);
-    mat3 TBN = mat3(Tangent, Bitangent, Normal);
-	*/
-
-	//mat3 TBN = mat3(T, B, N);
-
-	//o.TBN = TBN;
-	//o.tangent = worldTangent;
-
-
-	/*
-	vec3 TT = normalize(vec3(model * vec4(tangent,   0.0)));
-	vec3 BT = normalize(vec3(model * vec4(cross(normal,tangent), 0.0)));
-	vec3 NT = normalize(vec3(model * vec4(normal,    0.0)));
-	*/
-	//vec3 TT   = normalize(mat3(model) * tangent);
-
 	vec3 T   = normalize(vec3(model * vec4(tangent,0)));
 
     //vec3 NT   = normalize(mat3(model) * normal);
@@ -88,7 +50,7 @@ void main()
 	// re-orthogonalize T with respect to N
 	T = normalize(T - dot(T, N) * N);
 	// then retrieve perpendicular vector B with the cross product of T and N
-	vec3 B = cross(T, T);
+	vec3 B = cross(T, N);
 
 	mat3 TBN = mat3(T, B, N);
 
