@@ -11,5 +11,6 @@ in Data
 void main()
 {             
     // gl_FragDepth = gl_FragCoord.z;
+    bias = 0;
     color = vec4(bias + i.position.z / i.position.w);
 }  

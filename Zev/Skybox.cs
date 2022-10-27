@@ -142,7 +142,7 @@ namespace Example.Zev
             Va.BindIndices(ind);
         }
 
-        public void Draw(OrbitingCamera camera)
+        public void Draw(ICamera camera)
         {
             var cam = camera.ViewProjection;
 

@@ -32,10 +32,27 @@
     <EmbeddedResource Include="content\back.jpg" />
     <EmbeddedResource Include="content\bix - Kopieren.obj" />
     <EmbeddedResource Include="content\bix.obj" />
+    <EmbeddedResource Include="content\Shader\blur\blur.frag" />
+    <EmbeddedResource Include="content\Shader\blur\blur.vert" />
+    <EmbeddedResource Include="content\Shader\blur\float\blur5.frag" />
+    <EmbeddedResource Include="content\Shader\blur\float\blur5.vert" />
+    <EmbeddedResource Include="content\Shader\pointLight\single\shadow.geom" />
+    <EmbeddedResource Include="content\Shader\pointLight\single\shadow.frag" />
+    <EmbeddedResource Include="content\Shader\pointLight\single\shadow.vert" />
+    <EmbeddedResource Include="content\Shader\dirLight\shadow.frag" />
+    <EmbeddedResource Include="content\Shader\dirLight\shadow.vert" />
     <EmbeddedResource Include="content\Shader\equi2Cube.frag" />
     <EmbeddedResource Include="content\Shader\equi2Cube.vert" />
+    <EmbeddedResource Include="content\Shader\pointLight\shadow.frag" />
+    <EmbeddedResource Include="content\Shader\pointLight\shadow.vert" />
+    <EmbeddedResource Include="content\Shader\specular\preBrdf.frag" />
+    <EmbeddedResource Include="content\Shader\specular\preBrdf.vert" />
     <EmbeddedResource Include="content\Shader\specular\preFilter.frag" />
     <EmbeddedResource Include="content\Shader\specular\preFilter.vert" />
+    <EmbeddedResource Include="content\Shader\ssao\blurssao.frag" />
+    <EmbeddedResource Include="content\Shader\ssao\blurssao.vert" />
+    <EmbeddedResource Include="content\Shader\ssao\ssao.frag" />
+    <EmbeddedResource Include="content\Shader\ssao\ssao.vert" />
     <EmbeddedResource Include="content\specularIBL.frag" />
     <EmbeddedResource Include="content\specularIBL.vert" />
     <EmbeddedResource Include="content\blur5.frag" />
@@ -101,6 +118,14 @@
     <EmbeddedResource Include="content\Sphere.obj" />
     <EmbeddedResource Include="content\Sphere\untitled.bin" />
     <EmbeddedResource Include="content\Sphere\untitled.gltf" />
+    <EmbeddedResource Include="content\Sponza\glTF\Sponza.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\Sponza\glTF\Sponza.gltf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\Sponza\glTF\Sponza2.bin" />
+    <EmbeddedResource Include="content\Sponza\glTF\Sponza2.gltf" />
     <EmbeddedResource Include="content\suzanne.obj" />
     <EmbeddedResource Include="content\testScene\scene.bin" />
     <EmbeddedResource Include="content\testScene\scene.gltf" />
@@ -113,6 +138,17 @@
     <EmbeddedResource Include="content\tssdLF.png" />
     <EmbeddedResource Include="content\tssdRT.png" />
     <EmbeddedResource Include="content\tssdUP.png" />
+    <EmbeddedResource Include="content\Yeet2\Blender 2(1).bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\Yeet2\Blender 2(1).gltf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="content\yeet3\untitled.bin" />
+    <EmbeddedResource Include="content\yeet3\untitled.gltf" />
+    <EmbeddedResource Include="content\yeet\acgScene1.bin" />
+    <EmbeddedResource Include="content\yeet\acgScene1.gltf" />
+    <Resource Include="content\HDRI\kloppenheim_06_4k.hdr" />
     <Resource Include="content\wubeFolder\square_floor_diff_1k.jpg" />
     <Resource Include="content\wubeFolder\square_floor_nor_1k_jaa.jpg" />
     <Resource Include="content\wubeFolder\square_floor_rough_1k.png" />
@@ -156,6 +192,7 @@
     <None Remove="content\front.jpg" />
     <None Remove="content\gPassDef.frag" />
     <None Remove="content\gPassDef.vert" />
+    <None Remove="content\HDRI\kloppenheim_06_4k.hdr" />
     <None Remove="content\Helmet\SciFiHelmet.bin" />
     <None Remove="content\Helmet\SciFiHelmet.gltf" />
     <None Remove="content\Helmet\untitled.bin" />
@@ -180,10 +217,27 @@
     <None Remove="content\rawPBR.frag" />
     <None Remove="content\rawPBR.vert" />
     <None Remove="content\right.jpg" />
+    <None Remove="content\Shader\blur\blur.frag" />
+    <None Remove="content\Shader\blur\blur.vert" />
+    <None Remove="content\Shader\blur\float\blur5.frag" />
+    <None Remove="content\Shader\blur\float\blur5.vert" />
+    <None Remove="content\Shader\pointLight\single\shadow.frag" />
+    <None Remove="content\Shader\pointLight\single\shadow.geom" />
+    <None Remove="content\Shader\pointLight\single\shadow.vert" />
+    <None Remove="content\Shader\dirLight\shadow.frag" />
+    <None Remove="content\Shader\dirLight\shadow.vert" />
     <None Remove="content\Shader\equi2Cube.frag" />
     <None Remove="content\Shader\equi2Cube.vert" />
+    <None Remove="content\Shader\pointLight\shadow.frag" />
+    <None Remove="content\Shader\pointLight\shadow.vert" />
+    <None Remove="content\Shader\specular\preBrdf.frag" />
+    <None Remove="content\Shader\specular\preBrdf.vert" />
     <None Remove="content\Shader\specular\preFilter.frag" />
     <None Remove="content\Shader\specular\preFilter.vert" />
+    <None Remove="content\Shader\ssao\blurssao.frag" />
+    <None Remove="content\Shader\ssao\blurssao.vert" />
+    <None Remove="content\Shader\ssao\ssao.frag" />
+    <None Remove="content\Shader\ssao\ssao.vert" />
     <None Remove="content\skybox.frag" />
     <None Remove="content\skybox.vert" />
     <None Remove="content\specularIBL.frag" />
@@ -192,6 +246,10 @@
     <None Remove="content\Sphere.obj" />
     <None Remove="content\Sphere\untitled.bin" />
     <None Remove="content\Sphere\untitled.gltf" />
+    <None Remove="content\Sponza\glTF\Sponza.bin" />
+    <None Remove="content\Sponza\glTF\Sponza.gltf" />
+    <None Remove="content\Sponza\glTF\Sponza2.bin" />
+    <None Remove="content\Sponza\glTF\Sponza2.gltf" />
     <None Remove="content\suzanne.obj" />
     <None Remove="content\testScene\scene.bin" />
     <None Remove="content\testScene\scene.gltf" />
@@ -204,6 +262,12 @@
     <None Remove="content\tssdUP.png" />
     <None Remove="content\wubeFolder\wube.bin" />
     <None Remove="content\wubeFolder\wube.gltf" />
+    <None Remove="content\Yeet2\Blender 2%281%29.bin" />
+    <None Remove="content\Yeet2\Blender 2%281%29.gltf" />
+    <None Remove="content\yeet3\untitled.bin" />
+    <None Remove="content\yeet3\untitled.gltf" />
+    <None Remove="content\yeet\acgScene1.bin" />
+    <None Remove="content\yeet\acgScene1.gltf" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="content\DamagedHelmet\glTF\untitled2.bin" />
@@ -214,7 +278,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CjClutter.ObjLoader" Version="1.0.0" />
-    <PackageReference Include="OpenTK" Version="4.5.0" />
+    <PackageReference Include="OpenTK" Version="4.6.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.1" />
   </ItemGroup>
@@ -250,6 +314,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="content\HDRI\large_corridor_2k.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\HDRI\reinforced_concrete_01_4k.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\HDRI\simons_town_rocks_2k.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\HDRI\simons_town_rocks_4k.hdr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="content\Helmet\SciFiHelmet_AmbientOcclusion-SciFiHelmet_MetallicRoughness.png">
@@ -300,6 +373,225 @@
     <None Update="content\Sphere\white.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="content\Sponza\glTF\10381718147657362067.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\10388182081421875623.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\11474523244911310074.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\11490520546946913238.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\11872827283454512094.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\11968150294050148237.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\1219024358953944284.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\12501374198249454378.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\13196865903111448057.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\13824894030729245199.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\13982482287905699490.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\14118779221266351425.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\14170708867020035030.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\14267839433702832875.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\14650633544276105767.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\15295713303328085182.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\15722799267630235092.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\16275776544635328252.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\16299174074766089871.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\16885566240357350108.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\17556969131407844942.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\17876391417123941155.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\2051777328469649772.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\2185409758123873465.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\2299742237651021498.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\2374361008830720677.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\2411100444841994089.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\2775690330959970771.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\2969916736137545357.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\332936164838540657.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\3371964815757888145.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\3455394979645218238.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\3628158980083700836.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\3827035219084910048.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\4477655471536070370.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\4601176305987539675.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\466164707995436622.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\4675343432951571524.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\4871783166746854860.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\4910669866631290573.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\4975155472559461469.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\5061699253647017043.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\5792855332885324923.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\5823059166183034438.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\6047387724914829168.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\6151467286084645207.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\6593109234861095314.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\6667038893015345571.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\6772804448157695701.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\7056944414013900257.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\715093869573992647.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\7268504077753552595.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\7441062115984513793.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\755318871556304029.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\759203620573749278.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\7645212358685992005.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\7815564343179553343.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8006627369776289000.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8051790464816141987.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8114461559286000061.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8481240838833932244.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8503262930880235456.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8747919177698443163.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8750083169368950601.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8773302468495022225.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\8783994986360286082.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\9288698199695299068.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\9916269861720640319.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\Default_albedo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\Default_AO-Default_metalRoughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\Default_emissive.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\Default_normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Sponza\glTF\white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="content\testScene\normalyy.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -331,6 +623,387 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="content\wubeFolder\square_floor_rough_1k.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\20191230_134947.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\Backpacks_u1_v1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\boatback-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\boatback.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\Boss_u1_v1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\BuildingsShanty0039_7_M.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\ConcreteDirty0324_2_M.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\ConcreteLeaking0084_1_M.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\Gondolier_u1_v1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\hood.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\KaitlinOnBoat_u1_v1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\MachineryHeavy0086_1_M-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\MachineryHeavy0086_1_M.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\peeled-paint.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\redtarp.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\TexturesCom_GarbageContainers0014_M.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\TexturesCom_MetalLeaking0065_M.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\TexturesCom_WindowsHouseOld0143_M-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\TexturesCom_WindowsHouseOld0143_M.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\Various0318_S-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\Yeet2\Various0318_S.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\10381718147657362067.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\10388182081421875623.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\11474523244911310074.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\11490520546946913238.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\11872827283454512094.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\11968150294050148237.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\1219024358953944284.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\12501374198249454378.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\13196865903111448057.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\13824894030729245199.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\13982482287905699490.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\14118779221266351425.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\14170708867020035030.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\14267839433702832875.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\14650633544276105767.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\15295713303328085182.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\15722799267630235092.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\16275776544635328252.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\16299174074766089871.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\16885566240357350108.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\17556969131407844942.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\17876391417123941155.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\2051777328469649772.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\2185409758123873465.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\2299742237651021498.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\2374361008830720677.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\2411100444841994089.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\2775690330959970771.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\2969916736137545357.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\332936164838540657.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\3371964815757888145.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\3455394979645218238.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\3628158980083700836.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\3827035219084910048.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\4477655471536070370.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\4601176305987539675.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\466164707995436622.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\4675343432951571524.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\4871783166746854860.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\4910669866631290573.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\4975155472559461469.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\5061699253647017043.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\5792855332885324923.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\5823059166183034438.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\6047387724914829168.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\6151467286084645207.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\6593109234861095314.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\6667038893015345571.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\6772804448157695701.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\7056944414013900257.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\715093869573992647.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\7268504077753552595.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\7441062115984513793.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\755318871556304029.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\759203620573749278.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\7645212358685992005.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\7815564343179553343.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8006627369776289000.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8051790464816141987.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8114461559286000061.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8481240838833932244.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8503262930880235456.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8747919177698443163.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8750083169368950601.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8773302468495022225.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\8783994986360286082.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\9288698199695299068.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\9916269861720640319.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\Default_albedo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\Default_AO-Default_metalRoughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\Default_emissive.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\Default_normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet3\white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Bark001_ambientOcclusion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Bark001_diffuse.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Bark001_normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Clif_rock_BaseColor.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Clif_rock_Metallic-Clif_rock_Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Clif_rock_Normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\cobblestone_dirty_BaseColor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\cobblestone_dirty_Metallic-cobblestone_dirty_Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\cobblestone_dirty_Normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Diffuse.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\dry_ground_BaseColor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\dry_ground_Metallic-dry_ground_Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\dry_ground_Normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\marble Diffuse_bmp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\marble normal_bmp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\marble roughness_bmp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Metal039_2K_Color.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Metal039_2K_Metalness-Metal039_2K_Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Metal039_2K_Normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Rock_03_Base_Color.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Rock_03_Metallic-Rock_03_Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Rock_03_Normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Rock_04_Base_Color.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Rock_04_Metallic-Rock_04_Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Rock_04_Normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\steel_grinded_BaseColor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\steel_grinded_Metallic-steel_grinded_Roughness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\steel_grinded_Normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\stone_wall_diffuse.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\stone_wall_normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="content\yeet\stone_wall_roughness.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

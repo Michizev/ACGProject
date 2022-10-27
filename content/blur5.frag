@@ -28,5 +28,5 @@ void main()
         result += texture(image, texCoords - offset*i).rgb * weight[i];
     }
 
-    fragColor = vec4(result, 1.0);
+    fragColor = vec4(abs(result), 1.0);
 }

@@ -10,6 +10,7 @@ in Data
 uniform sampler2D scene;
 uniform sampler2D bloomScene;
 uniform float exposure;
+uniform bool useBloom = true;
 
 
 // Filmic Tonemapping Operators http://filmicworlds.com/blog/filmic-tonemapping-operators/
@@ -60,9 +61,11 @@ void main()
 {
 	
     vec3 hdrColor = texture(scene, i.texCoords).rgb;      
-    vec3 bloomColor = texture(bloomScene, i.texCoords).rgb;
-    hdrColor += bloomColor; // additive blending
-
+    vec3 bloomColor = textureLod(bloomScene, i.texCoords,0).rgb;
+    if(useBloom)
+    {
+        hdrColor += bloomColor; // additive blending
+    }
 
     // tone mapping after the images are combined!
     //vec3 result = vec3(1.0) - exp(-hdrColor * exposure);

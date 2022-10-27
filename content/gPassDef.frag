@@ -4,7 +4,9 @@ layout (location = 0) out vec4 Position;
 layout (location = 1) out vec3 Normal;
 layout (location = 2) out vec4 AlbedoSpec;
 layout (location = 3) out vec4 MetalRoughness;
-layout (location = 4) out vec3 PositionRaw;
+layout (location = 4) out vec3 ViewNormal;
+layout (location = 5) out vec4 ViewPos;
+layout (location = 6) out vec4 Emissive;
 
 in Data
 {
@@ -16,6 +18,8 @@ in Data
     vec3 tangentPos;
     vec3 tangentCameraPos;
     vec3 positionRaw;
+    vec3 viewNormal;
+    vec4 viewPos;
 } i;
 
 
@@ -23,11 +27,16 @@ uniform float heightScale = 1.0;
 uniform vec3 cameraPos;
 
 uniform sampler2D albedoMap;
+uniform bool hasAO;
 uniform sampler2D metalRoughnessMap;
 uniform sampler2D normalMap;
 uniform float normalStrength = 0.00001;
 
+uniform sampler2D emissiveMap;
+uniform bool hasEmissive = false;
+uniform float emissiveIntensitiy = 2.0f;
 uniform mat4 model;
+uniform mat4 view;
 
 //Code from http://ogldev.atspace.co.uk/www/tutorial26/tutorial26.html
 vec3 CalcBumpedNormal()
@@ -87,11 +96,13 @@ vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
 const float gamma = 2.2;
 void main()
 {   
+    ViewPos = i.viewPos;
+
     vec3 viewDir   = normalize(i.tangentPos - i.tangentCameraPos);
 
     //vec3 viewDir   = normalize(i.positionRaw - cameraPos);
 
-    PositionRaw = i.positionRaw;
+    
     //vec3 viewDir   = normalize(i.position - cameraPos);
     vec2 texCoords = ParallaxMapping(i.texCoords,  viewDir);
 
@@ -102,6 +113,13 @@ void main()
 
     texCoords = i.texCoords;
 
+    if(hasEmissive){
+        Emissive = textureLod(emissiveMap, texCoords,0) * emissiveIntensitiy;
+    }else{
+        Emissive = vec4(0);
+    }
+
+    
     /*
     if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
     discard;
@@ -114,6 +132,7 @@ void main()
     // also store the per-fragment normals into the gbuffer
     //Normal Mapping code
     //vec3 realNormal = normalize(i.normal);
+    ViewNormal = i.viewNormal;
 
     vec3 normaltex = texture(normalMap, texCoords).rgb;
 	vec3 normal = normaltex * 2.0 - 1.0;   
@@ -133,12 +152,16 @@ void main()
 
     //Normal = CalcBumpedNormal();
     // and the diffuse per-fragment color
-    AlbedoSpec.rgb = pow(texture(albedoMap, texCoords).rgb,vec3(gamma));
-    AlbedoSpec.a = 1;
+    vec4 tex = texture(albedoMap, texCoords).rgba;
+    AlbedoSpec = vec4(pow(tex.rgb,vec3(gamma)),tex.a);
+    //AlbedoSpec.rgb = texture(albedoMap, texCoords).rgb;
+
+
 
     //AlbedoSpec.rgb = vec3(texCoords,0);
 
     MetalRoughness.rgb = texture(metalRoughnessMap, texCoords).rgb;
+    if(!hasAO) MetalRoughness.r = 1;
     MetalRoughness.a = 1;
     // store specular intensity in gAlbedoSpec's alpha component
     //AlbedoSpec.a = texture(specularTexture, i.texCoords).r;

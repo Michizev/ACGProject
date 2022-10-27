@@ -13,39 +13,35 @@ namespace Example.Zev
         private ShaderProgram irradianceShader;
         private ShaderProgram HDRIToCubemapShader;
         private readonly ShaderProgram specularPrefilterShader;
+        private readonly ShaderProgram brdfPrefilterShader;
+        public ShaderProgram CubeShadow { get; }
         private List<Matrix4> inPV;
         private UniformCubeTexture envCube;
         private MeshGL cube;
-        private readonly Matrix4 captureProjection;
+
         private const string ResourceDir = nameof(Example) + ".content.";
-        private readonly Matrix4[] captureViews;
+        public Matrix4[] CaptureViews { get; }
+        public Matrix4 CaptureProjection { get; }
         readonly VertexArray emptyVa = new VertexArray();
         public TextureCalculator()
         {
             irradianceShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "irradiance"));
-            HDRIToCubemapShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "Shader."+ "equi2Cube"));
+            HDRIToCubemapShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "Shader." + "equi2Cube"));
             specularPrefilterShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "Shader.specular." + "preFilter"));
-
+            brdfPrefilterShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "Shader.specular." + "preBrdf"));
+            CubeShadow = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "Shader.pointLight." + "shadow"));
             //specularIrradianceShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "Shader." + "specular"));
-            captureProjection = Matrix4.CreatePerspectiveFieldOfView(1.5708f, 1, 0.1f, 10f);
+            CaptureProjection = Matrix4.CreatePerspectiveFieldOfView(1.5708f, 1, 0.1f, 10f);
 
             var box = "bix.obj";
             var vars = new ShaderProgramVariables(irradianceShader);
             var pos = vars.Get<VertexAttrib>("position");
 
             envCube = vars.Get<UniformCubeTexture>("environmentMap");
-            cube = MeshToGL.Create(Framework.ObjLoader.LoadFromResource(ResourceDir, box),pos);
+            cube = MeshToGL.Create(Framework.ObjLoader.LoadFromResource(ResourceDir, box), pos);
 
             var eye = Vector3.Zero;
-            captureViews = new List<Matrix4>
-            {
-                Matrix4.LookAt(eye,new Vector3(1.0f, 0.0f, 0.0f), new Vector3(0.0f, -1.0f, 0.0f)),
-                Matrix4.LookAt(eye,new Vector3(-1.0f, 0.0f, 0.0f),new Vector3(0.0f, -1.0f, 0.0f)),
-                Matrix4.LookAt(eye,new Vector3(0.0f, 1.0f, 0.0f), new Vector3(0.0f, 0.0f, 1.0f)),
-                Matrix4.LookAt(eye,new Vector3(0.0f, -1.0f, 0.0f),new Vector3(0.0f, 0.0f, -1.0f)),
-                Matrix4.LookAt(eye,new Vector3(0.0f, 0.0f, 1.0f), new Vector3(0.0f, -1.0f, 0.0f)),
-                Matrix4.LookAt(eye,new Vector3(0.0f, 0.0f, -1.0f),new Vector3(0.0f, -1.0f, 0.0f))
-            }.ToArray();
+            CaptureViews=DirsFromEye(eye);
 
             var viewDirs = new List<Vector3>
             {
@@ -58,13 +54,28 @@ namespace Example.Zev
             };
             int i = 0;
             inPV = new List<Matrix4>();
-            foreach (var v in captureViews)
+            foreach (var v in CaptureViews)
             {
-                var m = captureProjection * v;
+                var m = CaptureProjection * v;
                 m.Invert();
                 inPV.Add(m);
             }
         }
+
+        public Matrix4[] DirsFromEye(Vector3 eye)
+        {
+            var list = new List<Matrix4>
+            {
+                Matrix4.LookAt(eye,eye+new Vector3(1.0f, 0.0f, 0.0f), new Vector3(0.0f, -1.0f, 0.0f)),
+                Matrix4.LookAt(eye,eye+new Vector3(-1.0f, 0.0f, 0.0f),new Vector3(0.0f, -1.0f, 0.0f)),
+                Matrix4.LookAt(eye,eye+new Vector3(0.0f, 1.0f, 0.0f), new Vector3(0.0f, 0.0f, 1.0f)),
+                Matrix4.LookAt(eye,eye+new Vector3(0.0f, -1.0f, 0.0f),new Vector3(0.0f, 0.0f, -1.0f)),
+                Matrix4.LookAt(eye,eye+new Vector3(0.0f, 0.0f, 1.0f), new Vector3(0.0f, -1.0f, 0.0f)),
+                Matrix4.LookAt(eye,eye+new Vector3(0.0f, 0.0f, -1.0f),new Vector3(0.0f, -1.0f, 0.0f))
+            }.ToArray();
+            return list;
+        }
+
         void drawCube()
         {
             cube.VertexArray.Bind();
@@ -75,6 +86,32 @@ namespace Example.Zev
             GL.Enable(EnableCap.CullFace);
         }
 
+        public Texture PreBDRF()
+        {
+            var width = 512;
+            var height = 512;
+            var internalFormat = SizedInternalFormat.Rgba16f;
+            var format = PixelFormat.Rgb;
+
+            using var cache = new FrameBufferGL(false);
+            var tex = new Texture(width, height, SizedInternalFormat.Rgba16f);
+            
+            cache.Attach(tex, FramebufferAttachment.ColorAttachment0);
+
+            brdfPrefilterShader.Bind();
+
+            emptyVa.Bind();
+            cache.Draw(() =>
+            {
+                GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+            });
+
+            tex.MinFilter = TextureMinFilter.Nearest;
+            tex.MagFilter = TextureMagFilter.Nearest;
+            //GL.GenerateTextureMipmap(tex.Handle);
+            return tex;
+        }
+
 
         public Texture HDRIToTexture(HDRIimage image)
         {
@@ -82,8 +119,8 @@ namespace Example.Zev
             var format = PixelFormat.Rgb;
             var texture = new Texture(image.Width, image.Height, internalFormat)
             {
-                //Function = TextureWrapMode.ClampToEdge,
-                Function = TextureWrapMode.MirroredRepeat,
+                Function = TextureWrapMode.ClampToEdge,
+                //Function = TextureWrapMode.MirroredRepeat,
                 MagFilter = TextureMagFilter.Linear,
                 MinFilter = TextureMinFilter.Linear
             };
@@ -113,7 +150,7 @@ namespace Example.Zev
             //Console.WriteLine(data);
             GL.Viewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
 
-            shader.Uniform("projection", captureProjection);
+            shader.Uniform("projection", CaptureProjection);
 
             var cache = new FrameBufferGL();
             cache.Attach(new Texture(width, height, SizedInternalFormat.Rgba16f), FramebufferAttachment.ColorAttachment0);
@@ -125,7 +162,7 @@ namespace Example.Zev
             //GL.DepthFunc(DepthFunction.Equal);
             for (int i = 0; i < 6; ++i)
             {
-                shader.Uniform("view", captureViews[i]);
+                shader.Uniform("view", CaptureViews[i]);
                 GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
                                        TextureTarget.TextureCubeMapPositiveX + i, irradianceMap.Handle, 0);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -184,7 +221,7 @@ namespace Example.Zev
             var texture = vars.Get<UniformCubeTexture>("environmentMap");
             var viewMatrixLocation = vars.Get<UniformMatrix4>("view");
             shader.Bind();
-            shader.Uniform("projection", captureProjection);
+            shader.Uniform("projection", CaptureProjection);
 
             GL.BindTexture(TextureTarget.TextureCubeMap, skyboxTexture.Handle);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, cache.Handle);
@@ -229,7 +266,7 @@ namespace Example.Zev
             
             var viewMatrixLocation = vars.Get<UniformMatrix4>("view");
 
-            shader.Uniform("projection", captureProjection);
+            shader.Uniform("projection", CaptureProjection);
 
             var texture = vars.Get<UniformTexture>("equirectangularMap");
             //texture?.Bind(hdriTexture);
@@ -267,7 +304,7 @@ namespace Example.Zev
             //Console.WriteLine(data);
             GL.Viewport(0, 0, width, height); // don't forget to configure the viewport to the capture dimensions.
 
-            irradianceShader.Uniform("projection", captureProjection);
+            irradianceShader.Uniform("projection", CaptureProjection);
 
             var cache = new FrameBufferGL();
             cache.Attach(new Texture(width, height, SizedInternalFormat.Rgba16f), FramebufferAttachment.ColorAttachment0);
@@ -279,7 +316,7 @@ namespace Example.Zev
             //GL.DepthFunc(DepthFunction.Equal);
             for (int i = 0; i < 6; ++i)
             {
-                irradianceShader.Uniform("view", captureViews[i]);
+                irradianceShader.Uniform("view", CaptureViews[i]);
                 GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
                                        TextureTarget.TextureCubeMapPositiveX + i, irradianceMap.Handle, 0);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -320,7 +357,7 @@ namespace Example.Zev
             var cubeTexture = vars.Get<UniformCubeTexture>("environmentMap");
             var targetTexture = irradianceMap;
 
-            shader.Uniform("projection", captureProjection);
+            shader.Uniform("projection", CaptureProjection);
             cubeTexture.Value = baseTexture.Handle;
 
             using var cache = new FrameBufferGL();
@@ -374,7 +411,7 @@ namespace Example.Zev
             for (int i = 0; i < 6; ++i)
             {
                 //shader.Uniform("view", captureViews[i]);
-                viewMatrixLocation.Value = captureViews[i];
+                viewMatrixLocation.Value = CaptureViews[i];
                 GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
                                        TextureTarget.TextureCubeMapPositiveX + i, targetTexture.Handle, level);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
