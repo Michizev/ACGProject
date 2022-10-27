@@ -3,8 +3,10 @@ using Framework;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OpenTK.Input;
 using System;
 using System.Diagnostics;
+using OpenTK.Mathematics;
 
 namespace Example
 {
@@ -39,6 +41,11 @@ namespace Example
 
 					case Keys.G: view.RenderGUI = !view.RenderGUI; break;
 					case Keys.P: view.RenderExtraWindows = !view.RenderExtraWindows;break;
+					case Keys.B: view.Bloom = !view.Bloom; Console.WriteLine("Set bloom to " + view.Bloom); break;
+
+					case Keys.M: view.UseSSAO = !view.UseSSAO; break;
+					case Keys.C: view.Cameras.IncrementCamera(); break;
+					case Keys.V: view.CubeViewDirection(1); break;
 				}
 			};
 
@@ -48,8 +55,8 @@ namespace Example
 
 				if (mouseState.IsButtonDown(MouseButton.Left))
 				{
-					view.OrbitingCamera.Azimuth += 300 * args.DeltaX / window.Size.X;
-					view.OrbitingCamera.Elevation += 300 * args.DeltaY / window.Size.Y;
+					view.CurrentCamera.Azimuth += 300 * args.DeltaX / window.Size.X;
+					view.CurrentCamera.Elevation += 300 * args.DeltaY / window.Size.Y;
 				}
 			};
 
@@ -74,6 +81,39 @@ namespace Example
             }
 
 			window.UpdateFrame += args => view.OrbitingCamera.Distance *= MathF.Pow(1.05f, mouseState.ScrollDelta.Y);
+			var deltaTime = 0f;
+			var lastTime2 = 0f;
+			window.UpdateFrame += args =>
+			{
+				var tmpTime = stopWatch.ElapsedMilliseconds;
+				deltaTime = (tmpTime - lastTime2) / 1000f;
+				lastTime2 = tmpTime;
+
+				var state = window.KeyboardState;
+
+				var xAxis = 0;
+				var yAxis = 0;
+
+				if (state.IsKeyDown(Keys.A))
+				{
+					xAxis += -1;
+				}
+				if (state.IsKeyDown(Keys.D))
+				{
+					xAxis += 1;
+				}
+				if (state.IsKeyDown(Keys.W))
+				{
+					yAxis += -1;
+				}
+				if (state.IsKeyDown(Keys.S))
+				{
+					yAxis += 1;
+				}
+
+				view.FpsCamera.Movement = new Vector3(xAxis, yAxis, 0) * deltaTime;
+			};
+
 
 			window.RenderFrame += e =>
 			{

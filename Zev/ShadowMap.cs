@@ -5,9 +5,12 @@ namespace Example.Zev
 {
     class ShadowMap : ResizeableBaseCache
     {
-        public ShadowMap() : base(new DepthCache())
+        public ShadowMap() : base(new DepthCache(TextureWrapMode.ClampToEdge))
         {
-
+            var tex1 = Cache.GetTexture(FramebufferAttachment.ColorAttachment0);
+            tex1.Function = TextureWrapMode.ClampToEdge;
+           
+            
         }
 
     }
@@ -31,6 +34,13 @@ namespace Example.Zev
         public SingleHDRBuffer() : base(new SimpleHDRCache())
         {
 
+        }
+
+        public void SetFilterNearest()
+        {
+            var t = cache.cache.GetTexture(FramebufferAttachment.ColorAttachment0);
+            t.MinFilter = TextureMinFilter.Linear;
+            t.MagFilter = TextureMagFilter.Linear;
         }
     }
 

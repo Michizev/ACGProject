@@ -5,19 +5,19 @@
 - [ ] Shadow Map
 - [ ] Env Map
 - [x] Lighting
-- [ ] Bloom
+- [x] Bloom
 - [x] Instancing
 
 #### Better effects or upgrades
-- [ ] Post processing
-  - [ ] SSAO
-- [ ] Env Map
-  - [ ] IBL
+- [x] Post processing
+  - [x] SSAO
+- [x] Env Map
+  - [x] IBL
     - [x] Diffuse
-    - [ ] Specular
+    - [x] Specular
   - [ ] Imperfect reflections 
 - [ ] Spezielle shadow maps
-  - [ ] VSM 
+  - [x] VSM 
   - [ ] Perspective Shadow Maps
 - [x] Normal mapping
 - [x] Deferred lighting
@@ -30,5 +30,5 @@
 - [ ] Skinning
 - [ ] Scene
 - [x] Basic PBR
-- [ ] HDR
-  - [ ] Bloom HDR
+- [x] HDR
+  - [x] Bloom HDR

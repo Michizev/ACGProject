@@ -43,7 +43,7 @@ namespace Zev.HDRIHelper
 
             image.Flip();
             var bytes = image.GetPixelsUnsafe().ToArray();
-            for (int i = 0; i < bytes.Length; i++) bytes[i] *= 0.0001f;
+            for (int i = 0; i < bytes.Length; i++) bytes[i] *= 0.0001f*0.1f;
 
             return new HDRIimage(image.Width, image.Height, bytes);
          

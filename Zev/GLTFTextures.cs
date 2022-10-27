@@ -23,7 +23,8 @@ namespace Example
 			foreach (var i in _model.Gltf.Images)
 			{
 				var name = i.Name;
-				if(i.Name == null)
+				//Check if name exists and replace it with URI 
+				if(i.Name == null || imageNamesPath.ContainsKey(i.Name))
                 {
 					name = i.Uri;
                 }
@@ -43,6 +44,7 @@ namespace Example
 					if (imgName == null) imgName = _model.Gltf.Images[(int)t.Source].Uri;
 					var path = rootPath + '\\' + imageNamesPath[imgName];
 					Console.WriteLine(path);
+					path = path.Replace("%20", " ");
 					using var s = File.OpenRead(path);
 
 					//Console.WriteLine(s.CanRead);

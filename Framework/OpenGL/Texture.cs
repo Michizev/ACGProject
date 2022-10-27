@@ -16,6 +16,7 @@ namespace Framework
 			var size = Math.Max(width, height);
 			if(0 == levels) levels = (int)MathF.Ceiling(MathF.Log10(size) / MathF.Log10(2f));
 			GL.TextureStorage2D(Handle, levels, format, width, height);
+			GL.TextureParameter(Handle, TextureParameterName.TextureBaseLevel, 0);
 		}
 
 		public int Handle { get; }

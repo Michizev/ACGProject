@@ -6,37 +6,326 @@ using glTFLoader.Schema;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using Zev;
 using Zev.HDRIHelper;
+using Texture = Framework.Texture;
 
 namespace Example
 {
-    
+    interface ICamera
+    {
+        public Matrix4 View { get; }
+        public Matrix4 Projection { get; set; }
+        public Matrix4 ViewInv { get; }
+        public Matrix4 ViewProjection { get; }
 
+        public Vector3 Position { get; }
+
+        public float Azimuth { get; set; }
+        public float Elevation { get; set; }
+    }
+    class OrbitingCameraAdapter : OrbitingCamera, ICamera
+    {
+        public OrbitingCameraAdapter(float distance, float azimuth = 0, float elevation = 0) : base(distance, azimuth, elevation)
+        {
+        }
+
+        public Vector3 Position => CalcPosition();
+    }
+    class FullScreenQuad
+    {
+        static VertexArray emptyVa = new VertexArray();
+        public static void Draw()
+        {
+            //Load empty VA
+            emptyVa.Bind();
+            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+        }
+    }
+
+    class CameraHelper
+    {
+        public List<ICamera> Cameras { get; }
+        int currentCamera = 0;
+
+        public CameraHelper(List<ICamera> cameras)
+        {
+            Cameras = cameras;
+            CurrentCamera = Cameras[currentCamera];
+        }
+
+        public ICamera CurrentCamera { get; private set; }
+
+        public void IncrementCamera()
+        {
+            currentCamera++;
+            if (currentCamera > Cameras.Count-1)
+            {
+                currentCamera = 0;
+            }
+            CurrentCamera = Cameras[currentCamera];
+        }
+        public ICamera GetNextCamera()
+        {
+            IncrementCamera();
+            return CurrentCamera;
+        }
+    }
+    class SSAO : IDisposable, IResizeable
+    {
+        class Cache : ICacheMaker
+        {
+            public FrameBufferGL CreateCache(int width, int height)
+            {
+                var cache = new FrameBufferGL(true);
+                //cache.Attach(new Texture(width, height, Texture.DepthComponent32f), FramebufferAttachment.DepthAttachment);
+                cache.Attach(new Texture(width, height, SizedInternalFormat.R32f), FramebufferAttachment.ColorAttachment0);
+                //cache.Attach(new Texture(width, height, SizedInternalFormat.Rgba16f), FramebufferAttachment.ColorAttachment0);
+                cache.Attach(new Texture(width, height, SizedInternalFormat.Rgba8), FramebufferAttachment.ColorAttachment1);
+                return cache;
+            }
+        }
+
+        int width = 2;
+        int height = 2;
+
+        private const string resourceDir = nameof(Example) + ".content.";
+        Random r = new Random();
+
+        int sampleSize = 64;
+        int noiseSize = 16;
+
+        Texture noiseTexture;
+        ShaderProgram ssaoShader;
+
+        public CacheManager ssaoBuffer;
+        private ShaderProgram ssaoBlurShader;
+        private CacheManager ssaoBlurBuffer;
+        private UniformTexture blurInput;
+        private UniformVec2 noiseScale;
+        private UniformVec3 sampleVar;
+        private UniformTexture position;
+        private UniformTexture depth;
+        private UniformTexture normal;
+        private UniformTexture noise;
+
+        List<Vector3> ssaoSamples;
+        public SSAO()
+        {
+            noiseTexture = GenerateNoiseTexture();
+            ssaoShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(resourceDir + "Shader.ssao." + "ssao"));
+            ssaoBuffer = new CacheManager(new Cache());
+
+            var vars = new ShaderProgramVariables(ssaoShader);
+
+
+            position = vars.Get<UniformTexture>("gPosition");
+            depth = vars.Get<UniformTexture>("depth");
+            normal = vars.Get<UniformTexture>("gNormal");
+            noise = vars.Get<UniformTexture>("texNoise");
+            noiseScale = vars.Get<UniformVec2>("noiseScale");
+
+            sampleVar = vars.Get<UniformVec3>("samples[0]");
+          
+
+
+            ssaoSamples = GenerateKernel();
+
+            #region Blur
+
+            ssaoBlurShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(resourceDir + "Shader.ssao." + "blurssao"));
+            ssaoBlurBuffer = new CacheManager(new Cache());
+            var varsBlur = new ShaderProgramVariables(ssaoBlurShader);
+            blurInput = varsBlur.Get<UniformTexture>("ssaoInput");
+            #endregion
+        }
+        public void Dispose()
+        {
+            ((IDisposable)noiseTexture).Dispose();
+            ssaoShader.Dispose();
+            ssaoBlurShader.Dispose();
+            ssaoBuffer.Dispose();
+            ssaoBlurBuffer.Dispose();
+        }
+
+        public void CalculateSSAO(Matrix4 projection, Matrix4 invprojection, Matrix4 view, Texture worldPosition, Texture worldNormal, Texture renderDepth, Vector2 zVals)
+        {
+            ssaoBuffer.cache.Draw(() =>
+            {
+                GL.Clear(ClearBufferMask.ColorBufferBit);
+                ssaoShader.Bind();
+
+                normal?.Bind(worldNormal);
+                position?.Bind(worldPosition);
+                noise?.Bind(noiseTexture);
+                depth?.Bind(renderDepth);
+                if (noiseScale != null &&  noiseScale.Location != -1)
+                {
+                    noiseScale.Value = new Vector2((float)width / 4, (float)height / 4);
+                }
+
+                ssaoShader.Uniform("projection", projection);
+                ssaoShader.Uniform("view", view);
+
+                var target = view.ClearTranslation();
+                
+                ssaoShader.Uniform("viewMatrixInv", target.Inverted());
+                
+                ssaoShader.Uniform("projMatrixInv", invprojection);
+                ssaoShader.Uniform("samples[0]", ssaoSamples.ToArray());
+
+                ssaoShader.Uniform("zValues", zVals);
+
+
+
+
+                FullScreenQuad.Draw();
+
+            });
+
+            ssaoBlurBuffer.cache.Draw(() =>
+            {
+                GL.Clear(ClearBufferMask.ColorBufferBit);
+                ssaoBlurShader.Bind();
+                blurInput.Bind(ssaoBuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+
+                FullScreenQuad.Draw();
+            });
+        }
+        public List<Vector3> GenerateKernel()
+        {
+            static float lerp(float a, float b, float f)
+            {
+                return a + f * (b - a);
+            }
+
+            List<Vector3> samples = new List<Vector3>();
+            for (int i = 0; i < sampleSize; ++i)
+            {
+                var vec = new Vector3((float)r.NextDouble() * 2 - 1, (float)r.NextDouble() * 2 - 1, (float)r.NextDouble());
+
+                vec.Normalize();
+                vec *= (float)r.NextDouble();
+
+
+
+                float scale = (float)i / sampleSize;
+                scale = lerp(0.1f, 1.0f, scale * scale);
+
+                vec *= scale;
+
+                samples.Add(vec);
+            }
+            return samples;
+        }
+
+        public List<Vector3> GenerateNoise()
+        {
+            List<Vector3> noise = new List<Vector3>();
+            for (int i = 0; i < noiseSize; ++i)
+            {
+                var vec = new Vector3((float)r.NextDouble() * 2 - 1, (float)r.NextDouble() * 2 - 1, 0);
+                vec.Normalize();
+                noise.Add(vec);
+            }
+            return noise;
+        }
+
+        public Texture GenerateNoiseTexture()
+        {
+            var width = 4;
+            var height = 4;
+            Texture tex = new Texture(width, height, SizedInternalFormat.Rgba16f)
+            {
+                Function = TextureWrapMode.Repeat
+            };
+            tex.MagFilter = TextureMagFilter.Nearest;
+            tex.MinFilter = TextureMinFilter.Nearest;
+            var noise = GenerateNoise();
+
+            //GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb16f, width, height, 0, PixelFormat.Rgb, PixelType.Float, noise.ToArray());
+            //GL.TexSubImage2D(TextureTarget.Texture2D,0,0,)
+            var format = PixelFormat.Rgb;
+            GL.TextureSubImage2D(tex.Handle, 0, 0, 0, width, height, format, PixelType.Float, noise.ToArray());
+
+            return tex;
+        }
+
+        public void Resize(int width, int height)
+        {
+            ((IResizeable)ssaoBuffer).Resize(width, height);
+            ssaoBlurBuffer.Resize(width, height);
+            this.height = height;
+            this.width = width;
+        }
+
+        internal Texture GetTexture()
+        {
+            return ssaoBlurBuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0);
+        }
+    }
+    public class ShadowHelper
+    {
+        private const string ResourceDir = nameof(Example) + ".content.";
+        public ShaderProgram BlurShader { get; }
+        public UniformBool Horizontal { get; }
+        public UniformTexture Image { get; }
+
+        public ShadowHelper()
+        {
+            BlurShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "Shader.blur.float."+"blur5"));
+            var vars = new ShaderProgramVariables(BlurShader);
+            Horizontal = vars.Get<UniformBool>("horizontal");
+            Image = vars.Get<UniformTexture>("image");
+        }
+    }
+    public class DebugCamera : ICamera
+    {
+        public Matrix4 View { get; set; }
+
+        public Matrix4 Projection { get; set; }
+
+        public Matrix4 ViewInv { get; set; }
+
+        public Matrix4 ViewProjection { get; set; }
+
+        public Vector3 Position { get; set; }
+
+        public float Azimuth { get; set; }
+        public float Elevation { get; set; }
+    }
     internal class View : Disposable
     {
         private const string ResourceDir = nameof(Example) + ".content.";
         GLTFState state;
         private LightPassShader lightDefShader;
         private ShadowMap shadowMapDirectionalLight;
-
+        private ShadowMap shadowMapDirectionalLight2;
         public bool RenderGUI { get; set; }
 
         public float Exposure { get; set; } = 1.0f;
 
-        
+        public Vector2 ZNearFar = new Vector2();
+        public ICamera CurrentCamera { get; private set; }
+        public DebugCamera DebugCamera { get; }
+        public CameraHelper Cameras { get; }
 
+        int currentCubeDir = 0;
+        public void CubeViewDirection(int dir)
+        {
+            currentCubeDir += dir;
+            if (currentCubeDir > 5) currentCubeDir = 0;
+            if (currentCubeDir < 0) currentCubeDir = 5;
+        }
         public View()
         {
 
             GL.Enable(EnableCap.TextureCubeMapSeamless);
 
+            
 
             gbuffer = new GBUffer();
             state = new GLTFState();
@@ -51,7 +340,11 @@ namespace Example
             //wube = "otherModelLess.testSchatten.gltf";
             //wube = "Sphere.untitled.gltf";
             //wube = "Helmet.untitled.gltf";
-            wube = "DamagedHelmet.glTF.untitled2.gltf";
+            //wube = "DamagedHelmet.glTF.untitled2.gltf";
+            //wube = "yeet.acgScene1.gltf";
+            //wube = "Yeet2.Blender 2(1).gltf";
+            //wube = "Sponza.glTF.Sponza2.gltf";
+            wube = "yeet3.untitled.gltf";
             var target = ResourceDir + wube;
             var baseDir = ExtractBaseDir(target);
 
@@ -61,6 +354,7 @@ namespace Example
             }
 
             shadowMapDirectionalLight = new ShadowMap();
+            shadowMapDirectionalLight2 = new ShadowMap();
 
             var path = wube;
             path = path.Replace('.', '\\');
@@ -129,6 +423,8 @@ namespace Example
                 ResourceDir = nameof(Example) + ".content."
             };
 
+            #region oldSkybox
+            /*
             int skybox = 2;
             switch (skybox)
             {
@@ -145,10 +441,12 @@ namespace Example
                     cubeData.GenerateNames("", "jpg");
                     break;
             }
-
+            */
+            #endregion
             texCalc = new TextureCalculator();
             var hdriFilename = "large_corridor_2k.hdr";
-            //hdriFilename = "Alexs_Apt_2k.hdr";
+            hdriFilename = "Alexs_Apt_2k.hdr";
+            hdriFilename = "reinforced_concrete_01_4k.hdr";
             var hdri = "content/" + "HDRI/" + hdriFilename;
             CreateCubeMapFromHDRI(hdri);
 
@@ -160,8 +458,9 @@ namespace Example
 
             prefilterSpecularMap = texCalc.CalculateSpecularPrefilterMap(skyboxTexture);
 
-            
-            
+            brdfLut = texCalc.PreBDRF();
+
+
             irradianceMap = texCalc.CalculateIrradianceMap(skyboxTexture);
 
             box = new Skybox(skyboxTexture);
@@ -212,24 +511,44 @@ namespace Example
             rawPBR = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "rawPBR"));
             rawPBRVars = new ShaderProgramVariables(rawPBR);
 
-            directionalLight = new OrbitingCamera(OrbitingCamera.Distance, -52.5f, 36.66667f);
+            directionalLight = new OrbitingCameraAdapter(OrbitingCamera.Distance, -52.5f, 36.66667f);
 
 
             InterfaceSearcher.SearchForDisposeable(this);
 
 
             depthShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir + "depthLight"));
+            //depthShader = ShaderTools.PrintExceptions(() => ShaderProgramLoader.FromResourcePrefix(ResourceDir +"Shader.dirLight."+ "shadow"));
             var depthShaderVars = new ShaderProgramVariables(depthShader);
 
 
             fullCache = new HDRBuffer();
             fullCache2 = new HDRBuffer();
 
+
+            ssao = new SSAO();
+
             SetupCombineShader();
 
             SetupBlurShader();
 
-            GL.Enable(EnableCap.CullFace); //TODO: switch on/off; with differences in shadow quality can you see?
+            ShadowHelper = new ShadowHelper();
+
+            FpsCamera = new FpsCamera(new Vector3(1,0,0));
+            CurrentCamera = FpsCamera;
+            DebugCamera = new DebugCamera();
+
+            Cameras = new CameraHelper(new List<ICamera> { FpsCamera, OrbitingCamera, directionalLight });
+
+            #region Setup Shadow maps
+            shadowMapDirectionalLight.Resize(2048*2, 2048*2);
+            shadowMapDirectionalLight2.Resize(2048*2, 2048*2);
+            #endregion
+
+
+
+            //CurrentCamera = OrbitingCamera;
+            GL.Enable(EnableCap.CullFace); 
             GL.Enable(EnableCap.DepthTest);
         }
 
@@ -262,6 +581,7 @@ uniform float exposure;
             */
             combineScreen = combineShaderVars.Get<UniformTexture>("scene");
             combineBloom = combineShaderVars.Get<UniformTexture>("bloomScenee");
+            useBloom = combineShaderVars.Get<UniformBool>("useBloom");
             combineExposure = combineShaderVars.Get<UniformFloat>("exposure");
         }
 
@@ -274,7 +594,9 @@ uniform float exposure;
             blurDirection = blurShaderVars.Get<UniformBool>("horizontal");
 
             blurOne = new SingleHDRBuffer();
+            blurOne.SetFilterNearest();
             blurTwo = new SingleHDRBuffer();
+            blurOne.SetFilterNearest();
         }
 
         private static string ExtractBaseDir(string target)
@@ -290,7 +612,7 @@ uniform float exposure;
             return baseDir;
         }
 
-        public OrbitingCamera OrbitingCamera { get; } = new OrbitingCamera(10f);
+        public OrbitingCameraAdapter OrbitingCamera { get; } = new OrbitingCameraAdapter(10f);
         public bool Active { get; set; } = true;
         public bool RenderExtraWindows { get; internal set; }
 
@@ -315,7 +637,7 @@ uniform float exposure;
         private readonly UniformTexture shaderPostProcessingDepthImage;
         private int cacheToUse = 0;
 
-        private OrbitingCamera directionalLight;
+        private OrbitingCameraAdapter directionalLight;
 
         private VertexArray emptyVA = new VertexArray();
         (FrameBufferGL, FrameBufferGL) GetPingPongCache()
@@ -341,9 +663,9 @@ uniform float exposure;
 
             if (!Active) return;
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            CurrentCamera = Cameras.CurrentCamera;
 
-            texCalc.CalculateSpecularPrefilterMap(skyboxTexture);
-
+            //texCalc.CalculateSpecularPrefilterMap(skyboxTexture);
             deltaTime = time - lastTime;
             lastTime = time;
 
@@ -367,6 +689,9 @@ uniform float exposure;
             var near = MathF.Max(0.001f, OrbitingCamera.Distance - size);
             var far = OrbitingCamera.Distance + size;
 
+
+
+
             //far = OrbitingCamera.Distance + 10;
             //near = 1;
             //near = 1;
@@ -374,10 +699,30 @@ uniform float exposure;
             //far = 100;
             //near = OrbitingCamera.Distance/2;
             near = 0.1f;
-            far = 50f;
-            OrbitingCamera.Projection = Matrix4.CreatePerspectiveFieldOfView(1f, _aspect, near, far);
-            var lightSize = 20;
-            directionalLight.Projection = Matrix4.CreateOrthographic(lightSize * _aspect, lightSize, 0.1f, 50);
+            far = 100f;
+
+            ZNearFar.X = near;
+            ZNearFar.Y = far;
+
+            
+
+
+            CurrentCamera.Projection = Matrix4.CreatePerspectiveFieldOfView(1f, _aspect, near, far);
+
+            int lightID = 2;
+            int lightDir = currentCubeDir;
+            DebugCamera.Position = instanceLightPositions[lightID];
+            DebugCamera.View = texCalc.DirsFromEye(DebugCamera.Position)[lightDir];
+            DebugCamera.Projection = texCalc.CaptureProjection;
+            DebugCamera.ViewInv = DebugCamera.View.Inverted();
+            DebugCamera.ViewProjection = DebugCamera.View * DebugCamera.Projection;
+
+            var lightSize = 20f;
+            lightSize = 40f;
+            lightFarPlane = 70f;
+            var lightNearPlane = 0.1f;
+            directionalLight.Projection = Matrix4.CreateOrthographic(lightSize * 1.0f, lightSize, lightNearPlane, lightFarPlane);
+
             //OrbitingCamera.Projection = Matrix4.CreatePerspectiveFieldOfView(1f, _aspect,0.1f, 10);
             //directionalLight.Projection = Matrix4.CreatePerspectiveFieldOfView(1f, _aspect, 0.1f, 100);
 
@@ -404,12 +749,21 @@ uniform float exposure;
             //return;
             #region Draw G Buffer
             //_shaderProgram.Bind();
-            gbuffer.Bind();
 
+
+
+            gbuffer.Bind();
             gbuffer.cache.Draw(() =>
             {
                 DrawData(time);
             });
+
+            //GL.Enable(EnableCap.Blend);
+            //GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+
+            //TODO: Sort then render transparent objects into GBUffer
+
+            //GL.Disable(EnableCap.Blend);
 
 
             //Copy Depth Buffer
@@ -436,7 +790,14 @@ uniform float exposure;
                 GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
                 var viewPro = directionalLight.ViewProjection;
                 depthShader.Uniform("lightSpaceMatrix", viewPro);
+                /*
+                 * 
+                 * lightPos;
+uniform float farPlane;
+                */
 
+                depthShader.Uniform("lightPos", directionalLight.CalcPosition());
+                depthShader.Uniform("farPlane", lightFarPlane);
                 foreach (var (globalTransform, drawable, material) in _modelRenderer.TraverseSceneGraphDrawables())
                 {
                     depthShader.Uniform("model", globalTransform);
@@ -445,85 +806,61 @@ uniform float exposure;
             });
             if (cullface) GL.CullFace(CullFaceMode.Back);
 
+            #region Blur Shadow Map (Variance Shadow Map)
+            ShadowHelper.BlurShader.Bind();
+            for (int i = 0; i < 10; i++)
+            {
+                shadowMapDirectionalLight2.Cache.Draw(() =>
+                {
+                    GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
 
-            emptyVA.Bind();
-            lightDefShader.Bind();
+                    ShadowHelper.Horizontal.Value = false;
+                    ShadowHelper.Image?.Bind(shadowMapDirectionalLight.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
 
+                    FullScreenQuad.Draw();
+                });
+
+                shadowMapDirectionalLight.Cache.Draw(() =>
+                {
+                    GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
+
+                    ShadowHelper.Horizontal.Value = true;
+                    ShadowHelper.Image?.Bind(shadowMapDirectionalLight2.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+
+
+                    FullScreenQuad.Draw();
+                });
+            }
+            #endregion
+            #endregion
+            #region SSAO
+            {
+                if (UseSSAO)
+                {
+                    var worldPos = gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0);
+                    var worldNormal = gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1);
+
+                    var viewNormal = gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment4);
+                    var viewPosition = gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment5);
+
+                    ssao.CalculateSSAO(CurrentCamera.Projection, CurrentCamera.Projection.Inverted(), CurrentCamera.View, viewPosition, worldNormal, fullCache.Cache.GetTexture(FramebufferAttachment.DepthAttachment), ZNearFar);
+                }
+            }
             #endregion
 
+            #region Calculate Point lights
 
+            //GL.CullFace(CullFaceMode.Front);
+            DrawPointLightShadow();
+            //GL.CullFace(CullFaceMode.Back);
+            #endregion
 
             #region Draw PBR
-
-            //Copy Depth in Buffer
-            GL.BlitNamedFramebuffer(gbuffer.cache.Handle, fullCache.Cache.Handle, 0, 0, fwidth, fheight, 0, 0, fwidth, fheight, ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit, BlitFramebufferFilter.Nearest);
-
-            var lightPos = instanceLightPositions;
-            var lightColors = new List<Vector3> { (1, 0.7f, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1), };
-            
-            
-            for (int i = 0; i < lightColors.Count; i++)
-            {
-                lightColors[i] *= 1;
-            }
-            
-            var lightPosLocation = lightDefShader.Shader.CheckedUniformLocation("lightPositions[0]");
-            var lightColorsLocation = lightDefShader.Shader.CheckedUniformLocation("lightColors[0]");
-
-            if (lightPosLocation != -1)
-                lightDefShader.Shader.Uniform(lightPosLocation, lightPos);
-            if (lightColorsLocation != -1)
-                lightDefShader.Shader.Uniform(lightColorsLocation, lightColors.ToArray());
-
-
-
-            lightDefShader.AlbedoMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment2));
-            lightDefShader.NormalMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1));
-            lightDefShader.PosMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0));
-            lightDefShader.MetalRoughtnessMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment3));
-            lightDefShader.EnvMap?.Bind(skyboxTexture);
-            lightDefShader.DepthMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.DepthAttachment));
-            lightDefShader.PositionRawMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment4));
-
-            lightDefShader.IrradianceMap?.Bind(irradianceMap);
-
-
-
-            #region Directional Light Variables
-            var dirLightPos = directionalLight.CalcPosition();
-            if (lightDefShader.DirectionalLightDirection != null)
-            {
-                var dir = dirLightPos - directionalLight.Target;
-                //Console.WriteLine("LIGHT DIR: " + dir.Normalized() + " VIEW DIR: " + OrbitingCamera.CalcPosition().Normalized());
-
-                lightDefShader.DirectionalLightDirection.Value = dir.Normalized(); //dir.Normalized();
-            }
-            //lightDefShader.DirectionalLightMatrix.Value = directionalLight.ViewProjection;
-            if (lightDefShader.DirectionalLightMatrix != null)
-            {
-                lightDefShader.DirectionalLightMatrix.Value = directionalLight.ViewProjection;
-            }
-
-            lightDefShader.DirectionalLightShadowMap?.Bind(shadowMapDirectionalLight.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
-
-            if (lightDefShader.CameraPos != null)
-            {
-                var pos = OrbitingCamera.CalcPosition();
-                lightDefShader.CameraPos.Value = pos;
-                //Console.WriteLine(pos);
-            }
-            #endregion
-
-            fullCache.Cache.Draw(() =>
-            {
-                GL.Clear(ClearBufferMask.ColorBufferBit);
-                GL.DepthMask(false);
-                GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
-                GL.DepthMask(true);
-            });
+            DrawPBR(fwidth, fheight);
 
             #endregion
 
+            
 
             #region Draw Instanced Lights
             var drawLights = true;
@@ -532,8 +869,8 @@ uniform float exposure;
                 shaderLightBallsInstanced.Bind();
 
                 shaderLightBallsInstanced.Uniform("world", Matrix4.Identity);
-                shaderLightBallsInstanced.Uniform("camera", OrbitingCamera.ViewProjection);
-                shaderLightBallsInstanced.Uniform("cameraPos", OrbitingCamera.CalcPosition());
+                shaderLightBallsInstanced.Uniform("camera", CurrentCamera.ViewProjection);
+                shaderLightBallsInstanced.Uniform("cameraPos", CurrentCamera.Position);
 
                 lightSphere.VertexArray.Bind();
                 //GL.DrawArraysInstanced(PrimitiveType.Triangles, 0, lightSphere.IndexCount, instanceLightPositions.Length);
@@ -553,7 +890,7 @@ uniform float exposure;
                 {
                     GL.DepthMask(false);
                     GL.DepthFunc(DepthFunction.Equal);
-                    box.Draw(OrbitingCamera);
+                    box.Draw(CurrentCamera);
                     GL.DepthFunc(DepthFunction.Less);
                     GL.DepthMask(true);
                 });
@@ -609,8 +946,8 @@ uniform float exposure;
 
             emptyVA.Bind();
             combineShader.Bind();
-
             combineBloom?.Bind(currenBlurCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+            useBloom.Value = Bloom;
             combineScreen?.Bind(fullCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
 
             if (combineExposure != null)
@@ -624,12 +961,18 @@ uniform float exposure;
             {
                 //overlayCacheTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0));
                 //overlayCacheTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment2));
-                overlayCacheTexture.Draw(fullCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+
+                //overlayCacheTexture.Draw(fullCache.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+                overlayCacheTexture.Draw(ssao.ssaoBuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0));
                 //overlayDepthTexture.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.DepthAttachment));
+
+                //overlayCacheTexture.Draw(ssao.ssaoBuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1));
+                //overlayCacheTexture.Draw(ssao.ssaoBuffer.cache.G);
+
                 overlayDepthTexture.Draw(shadowMapDirectionalLight.Cache.GetTexture(FramebufferAttachment.DepthAttachment));
                 overlayTextureRight.Draw(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1));
             }
-            if(RenderGUI)RenderIMGUI();
+            if (RenderGUI) RenderIMGUI();
 
 
 
@@ -682,9 +1025,172 @@ uniform float exposure;
             */
         }
 
+        CubeTexture cubeShadow;
+        FrameBufferGL shadowCubeFramebuffer;
+
+        int cubeShadowWidth = 512;
+        int cubeShadowHeight = 512;
+        private void InitCubeShadowStuff()
+        {
+            if (shadowCubeFramebuffer != null) return;
+
+            cubeShadow = CubeTextureLoader.MakeEmptyCubeMap(cubeShadowWidth, cubeShadowHeight);
+            shadowCubeFramebuffer = new FrameBufferGL();
+            var col = new Texture(cubeShadowWidth, cubeShadowHeight, SizedInternalFormat.Rgba32f);
+            //col.Function = TextureWrapMode.ClampToEdge;
+            shadowCubeFramebuffer.Attach(col, FramebufferAttachment.ColorAttachment0);
+            shadowCubeFramebuffer.Attach(new Texture(cubeShadowWidth, cubeShadowHeight, (SizedInternalFormat)All.DepthComponent32), FramebufferAttachment.DepthAttachment);
+        }
+        private void DrawPointLightShadow()
+        {
+            InitCubeShadowStuff();
+            var port = new ViewportHelper();
+            port.GetCurrentViewPort();
+            var shader = texCalc.CubeShadow;
+            shader.Bind();
+
+            GL.Viewport(0, 0, cubeShadowWidth, cubeShadowHeight);
+            int lightID = 2;
+            var near = 0.01f;
+            pointLightFar = 100f;
+            var captureProjection = Matrix4.CreatePerspectiveFieldOfView(ZMath.ToRadians(90f), 1, near, pointLightFar);
+            var pos = instanceLightPositions[lightID];
+            var dirs = texCalc.DirsFromEye(pos);
+            //TODO FRAMEBUFFER
+            shader.Uniform("projection", captureProjection);
+            shader.Uniform("lightPos", pos);
+            shader.Uniform("farPlane", pointLightFar);
+
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, shadowCubeFramebuffer.Handle);
+                
+                //GL.DepthFunc(DepthFunction.Equal);
+                for (int i = 0; i < 6; ++i)
+                {
+                    shader.Uniform("view", dirs[i]);
+                    GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+                                           TextureTarget.TextureCubeMapPositiveX + i, cubeShadow.Handle, 0);
+                    GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+                    foreach (var (globalTransform, drawable, material) in _modelRenderer.TraverseSceneGraphDrawables())
+                    {
+                        shader.Uniform("model", globalTransform);
+                        drawable.Draw();
+                    }
+                }
+                
+
+                // GL.GenerateTextureMipmap(irradianceMap.Handle);
+
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            //GL.DepthFunc(DepthFunction.Less);
+
+            port.SetLastViewport();
+        }
+
+        private void DrawPBR(int fwidth, int fheight)
+        {
+            emptyVA.Bind();
+            var shader = lightDefShader;
+            //lightDefShader.CalculatePositions();
+            shader.Bind();
+            //Copy Depth in Buffer
+            GL.BlitNamedFramebuffer(gbuffer.cache.Handle, fullCache.Cache.Handle, 0, 0, fwidth, fheight, 0, 0, fwidth, fheight, ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit, BlitFramebufferFilter.Nearest);
+
+            var lightPos = instanceLightPositions;
+            var lightColors = new List<Vector3> { (1, 0.7f, 1), (1, 1, 1), (1, 1, 1), (1, 1, 1), };
+
+
+            for (int i = 0; i < lightColors.Count; i++)
+            {
+                lightColors[i] *= 1;
+            }
+
+            var lightPosLocation = shader.Shader.CheckedUniformLocation("lightPositions[0]");
+            var lightColorsLocation = shader.Shader.CheckedUniformLocation("lightColors[0]");
+
+            if (lightPosLocation != -1)
+                shader.Shader.Uniform(lightPosLocation, lightPos);
+            if (lightColorsLocation != -1)
+                shader.Shader.Uniform(lightColorsLocation, lightColors.ToArray());
+
+
+
+            shader.AlbedoMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment2));
+            shader.NormalMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment1));
+            shader.PosMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+            shader.MetalRoughtnessMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment3));
+            shader.EnvMap?.Bind(skyboxTexture);
+            shader.DepthMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.DepthAttachment));
+            shader.ViewNormalMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment4));
+            shader.EmissiveMap?.Bind(gbuffer.cache.GetTexture(FramebufferAttachment.ColorAttachment6));
+            shader.IrradianceMap?.Bind(irradianceMap);
+
+            #region Specular Reflections
+            shader.BRDFLUT?.Bind(brdfLut);
+            shader.PrefilterSpecularMap?.Bind(prefilterSpecularMap);
+            #endregion
+
+            #region Point Shadow
+            //pointLightShadow, pointLightFar
+
+            shader.PointLightMap?.Bind(cubeShadow);
+            shader.Shader.Uniform("pointLightFar", pointLightFar);
+
+            #endregion
+
+
+            #region SSAO
+            shader.SsaoMap?.Bind(ssao.GetTexture());
+
+            if (shader.UseSSAO != null)
+            {
+                shader.UseSSAO.Value = UseSSAO;
+            }
+
+            #endregion
+
+
+
+
+            #region Directional Light Variables
+            var dirLightPos = directionalLight.CalcPosition();
+            if (shader.DirectionalLightDirection != null)
+            {
+                var dir = dirLightPos - directionalLight.Target;
+                //Console.WriteLine("LIGHT DIR: " + dir.Normalized() + " VIEW DIR: " + OrbitingCamera.CalcPosition().Normalized());
+
+                //shader.DirectionalLightDirection.Value = dir.Normalized(); //dir.Normalized();
+            }
+            //lightDefShader.DirectionalLightMatrix.Value = directionalLight.ViewProjection;
+            if (shader.DirectionalLightMatrix != null)
+            {
+                shader.DirectionalLightMatrix.Value = directionalLight.ViewProjection;
+            }
+
+            shader.Shader.Uniform("farPlaneDirLight", lightFarPlane);
+
+            shader.DirectionalLightShadowMap?.Bind(shadowMapDirectionalLight.Cache.GetTexture(FramebufferAttachment.ColorAttachment0));
+
+            if (shader.CameraPos != null)
+            {
+                var pos = CurrentCamera.Position;
+                shader.CameraPos.Value = pos;
+                //Console.WriteLine(pos);
+            }
+            #endregion
+
+            fullCache.Cache.Draw(() =>
+            {
+                GL.Clear(ClearBufferMask.ColorBufferBit);
+                GL.DepthMask(false);
+                GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+                GL.DepthMask(true);
+            });
+        }
+
         private void RenderIMGUI()
         {
-            
+
             ImGui.ShowDemoWindow();
             imguiController.Render();
 
@@ -696,14 +1202,14 @@ uniform float exposure;
         private void DrawData(float time)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            gbuffer.Program.Uniform("viewProjection", OrbitingCamera.ViewProjection);
-            gbuffer.Program.Uniform("cameraPos", OrbitingCamera.CalcPosition());
+            gbuffer.Program.Uniform("viewProjection", CurrentCamera.ViewProjection);
+            gbuffer.Program.Uniform("cameraPos", CurrentCamera.Position);
             //_shaderProgram.Uniform("cameraPos", OrbitingCamera.CalcPosition());
 
             //var locBaseColor = _shaderProgram.CheckedUniformLocation("baseColor");
             var locWorld = gbuffer.Program.CheckedUniformLocation("model");
-            gbuffer.Program.Uniform("view", OrbitingCamera.View);
-            gbuffer.Program.Uniform("projection", OrbitingCamera.Projection);
+            gbuffer.Program.Uniform("view", CurrentCamera.View);
+            gbuffer.Program.Uniform("projection", CurrentCamera.Projection);
             /*
              * uniform vec3[4] lightPositions;
 uniform vec3[4] lightColors;
@@ -721,6 +1227,7 @@ uniform vec3[4] lightColors;
 
                 if (material != null)
                 {
+                    
                     //SetMaterial(material);
                     if (material.NormalTexture != null)
                     {
@@ -732,12 +1239,32 @@ uniform vec3[4] lightColors;
                         if (material.PbrMetallicRoughness.BaseColorTexture != null)
                         {
                             var index = material.PbrMetallicRoughness.BaseColorTexture.Index;
+                            if (material.ShouldSerializeAlphaMode()) continue;
                             gbuffer.Albedo?.Bind(textures.TextureToTextureHandle[index]);
+                            
                         }
                         if (material.PbrMetallicRoughness.MetallicRoughnessTexture != null)
                         {
                             var index = material.PbrMetallicRoughness.MetallicRoughnessTexture.Index;
                             gbuffer.MetalRoughness?.Bind(textures.TextureToTextureHandle[index]);
+                        }
+                        if (material.EmissiveTexture != null)
+                        {
+                            gbuffer.HasEmissive.Value = true;
+                            var index = material.EmissiveTexture.Index;
+                            gbuffer.Emissive?.Bind(textures.TextureToTextureHandle[index]);
+                        }
+                        else
+                        {
+                            gbuffer.HasEmissive.Value = false;
+                        }
+                        if(material.OcclusionTexture != null)
+                        {
+                            gbuffer.HasAO.Value = true;
+                        }
+                        else
+                        {
+                            gbuffer.HasAO.Value = false;
                         }
                     }
                 }
@@ -763,15 +1290,19 @@ uniform vec3[4] lightColors;
 
                 gbuffer.Resize(width, height);
 
-                shadowMapDirectionalLight.Resize(width, height);
+
 
                 fullCache.Resize(width, height);
                 fullCache2.Resize(width, height);
 
-                blurOne.Resize(width, height);
-                blurTwo.Resize(width, height);
+                var blurWidth = (int)(width*0.6f);
+                var blurHeight = (int)(height *0.6f);
+                blurOne.Resize(blurWidth, blurHeight);
+                blurTwo.Resize(blurWidth, blurHeight);
 
                 imguiController.WindowResized(width, height);
+
+                ssao.Resize(width, height);
             }
         }
 
@@ -801,27 +1332,37 @@ uniform vec3[4] lightColors;
         private Vector3[] instanceLightPositions;
         private TextureCalculator texCalc;
         private CubeTexture prefilterSpecularMap;
+        private Texture brdfLut;
         private CubeTexture irradianceMap;
         private BufferGL lightSpherePositionBuffer;
         private VertexAttrib lightInstancePos;
         private ShaderProgram depthShader;
         private HDRBuffer fullCache;
         private HDRBuffer fullCache2;
+        private SSAO ssao;
         private ShaderProgram combineShader;
         private UniformTexture combineScreen;
         private UniformTexture combineBloom;
+        private UniformBool useBloom;
         private UniformFloat combineExposure;
         private ShaderProgram blurShader;
         private UniformTexture blurInput;
         private UniformBool blurDirection;
         private SingleHDRBuffer blurOne;
         private SingleHDRBuffer blurTwo;
+        private float lightFarPlane;
+        private float pointLightFar;
+
+        public bool UseSSAO { get; set; } = true;
+        public bool Bloom { get; set; } = true;
+        public ShadowHelper ShadowHelper { get; }
+        public FpsCamera FpsCamera { get; internal set; }
 
         private void DrawNewFrame(float time)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            _shaderProgram.Uniform("camera", OrbitingCamera.ViewProjection);
-            _shaderProgram.Uniform("cameraPos", OrbitingCamera.CalcPosition());
+            _shaderProgram.Uniform("camera", CurrentCamera.ViewProjection);
+            _shaderProgram.Uniform("cameraPos", CurrentCamera.Position);
 
             var locBaseColor = _shaderProgram.CheckedUniformLocation("baseColor");
             void SetMaterial(Material? material)

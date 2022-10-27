@@ -24,14 +24,18 @@ out Data
 	vec3 tangentPos;
     vec3 tangentCameraPos;
 	vec3 positionRaw;
+	vec3 viewNormal;
+	vec4 viewPos;
 } o;
 
 void main()
 {
 	mat4 modelView = view*model;
 	vec3 worldNormal = normalize(mat3(modelView) * normal);
-	
+	o.viewNormal = normalize(mat3(modelView) * normal);
 	vec4 position_world = model * vec4(position,1);
+
+	o.viewPos = modelView * vec4(position,1);
 	o.positionRaw = position;
 	o.position = position_world;
 	o.texCoords = texcoord_0;
